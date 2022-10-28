@@ -5,20 +5,31 @@ namespace Overhaul.Common.Tests
     [TestClass()]
     public class SupportedTests
     {
+        private readonly Type _type = typeof(SupportedTypesClass);
 
-        private Type _type = typeof(SqlTypesClass);
+        [TestMethod]
+        public void ValidProperyTest()
+        {
+            // Arrange
+            var properties = _type.GetProperties();
+
+            // Assert
+            foreach (var prop in properties)
+            {
+                Assert.IsTrue(Supported.ValidProperty(prop));
+            }
+        }
 
         [TestMethod()]
         public void GetPropertiesForTypeTest()
         {
-            // Arrange
-
             // Act
             var types = Supported.GetPropertiesForType(_type);
 
             // Assert
-            Assert.IsTrue(types.Any(i => i.Name.Equals("A")));
-            Assert.IsTrue(types.Any(i => i.Name.Equals("B")));
+            Assert.IsTrue(types.Any(i => i.Name.Equals("Int")));
+            Assert.IsTrue(types.Any(i => i.Name.Equals("String")));
+            // when im bored write the rest :)
         }
 
         [TestMethod()]
@@ -31,16 +42,28 @@ namespace Overhaul.Common.Tests
             var strQuery = Supported.ConvertPropertiesToTypesString(types);
 
             // Assert
+            var expectedSql = "Int INT,String NVARCHAR(255),"+
+                                 "Float FLOAT,Decimal DECIMAL,"+
+                                 "Char CHAR(2),Double FLOAT,"+
+                                 "Guid UNIQUEIDENTIFIER,"+
+                                 "Short SMALLINT,Byte TINYINT,"+ 
+                                 "Bool BIT,DateTime DATETIME";
 
-            Assert.AreEqual("A INT,B NVARCHAR(255)", strQuery);
+            Assert.AreEqual(expectedSql, strQuery);
         }
-
-
-        public sealed class SqlTypesClass
+        public sealed class SupportedTypesClass
         {
-            public int A { get; set; }
-
-            public string B { get; set; } = string.Empty;
+            public int Int { get; set; }
+            public string String { get; set; } = string.Empty;
+            public float Float { get; set; }
+            public decimal Decimal { get; set; }
+            public char Char { get; set; }
+            public double Double { get; set; }
+            public Guid Guid { get; set; }
+            public short Short { get; set; }
+            public byte Byte { get; set;  }
+            public bool Bool { get; set; }
+            public DateTime DateTime { get; set; }
         }
     }
 }

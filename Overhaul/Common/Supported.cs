@@ -19,6 +19,7 @@ namespace Overhaul.Common
             {typeof(short), "SMALLINT" },
             {typeof(decimal), "DECIMAL" },
             {typeof(DateTime), "DATETIME"},
+            {typeof(char), "CHAR(2)" }
         };
 
         public static PropertyInfo[] GetPropertiesForType(Type type)
@@ -27,39 +28,32 @@ namespace Overhaul.Common
                                      .Where(i => ValidProperty(i)).ToArray();
         }
 
-        private static bool ValidProperty(PropertyInfo info)
+        public static string ConvertPropertiesToTypesString(PropertyInfo[] types)
+        {
+            var validTypes = types.Where(i => SqlTypes.ContainsKey(i.PropertyType))
+                .Select(i => (i.Name, SqlTypes[i.PropertyType]));
+
+            var builder = new StringBuilder();
+
+            foreach(var _type in validTypes)
+            {
+                builder.Append($"{_type.Name} {_type.Item2}{(_type == validTypes.Last() ? "" : ",")}");
+            }
+
+            return builder.ToString();
+        }
+
+        internal static bool ValidProperty(PropertyInfo info)
         {
             var read = info.CanRead;
             var write = info.CanWrite;
+            // var primitieve = info.DeclaringType.IsPrimitive; does not support datetime && guid
             var publicSet = info.GetSetMethod(false)?.IsPublic;
             var publicGet = info.GetGetMethod(false)?.IsPublic;
 
             return read && write &&
                 publicSet.Value &&
                 publicGet.Value;
-        }
-
-        public static string ConvertPropertiesToTypesString(PropertyInfo[] types)
-        {
-            var names = types.Select(t => t.Name)
-                .ToArray();
-
-            var sqlTypes = types.Select(i => SqlTypes[i.PropertyType])
-                .ToArray();
-
-            if (names.Length != sqlTypes.Length)
-            {
-                throw new Exception("Invalid lenght comparison");
-            }
-
-            var builder = new StringBuilder();
-
-            for (var i = 0; i < names.Length; i++)
-            {
-                builder.Append($"{names[i]} {sqlTypes[i]}{(names[i] == names.Last() ? "" : ",")}");
-            }
-
-            return builder.ToString();
         }
     } 
 }
