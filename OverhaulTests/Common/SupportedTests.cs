@@ -39,7 +39,7 @@ namespace Overhaul.Common.Tests
             var types = Supported.GetPropertiesForType(_type);
 
             // Act
-            var strQuery = Supported.ConvertPropertiesToTypesString(types);
+            var strQuery = Supported.ConvertPropertiesToTypesString(types, out int count);
 
             // Assert
             var expectedSql = "Int INT,String NVARCHAR(255),"+
@@ -50,6 +50,7 @@ namespace Overhaul.Common.Tests
                                  "Bool BIT,DateTime DATETIME";
 
             Assert.AreEqual(expectedSql, strQuery);
+            Assert.AreEqual(11, count);
         }
         public sealed class SupportedTypesClass
         {
