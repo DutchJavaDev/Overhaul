@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using Dapper.Contrib.Extensions;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -22,25 +23,54 @@ namespace Overhaul.Common
             {typeof(char), "CHAR(2)" }
         };
 
+        private readonly static List<Type> SqlIdentityTypes = new()
+        {
+            typeof(int),
+            typeof(Guid),
+        };
+
         public static PropertyInfo[] GetPropertiesForType(Type type)
         {
-            return type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                                     .Where(i => ValidProperty(i)).ToArray();
+            return type.GetProperties().Where(i => ValidProperty(i))
+                .ToArray();
         }
 
-        public static string ConvertPropertiesToTypesString(PropertyInfo[] types)
+        public static string ConvertPropertiesToTypesString(PropertyInfo[] types, out int count)
         {
-            var validTypes = types.Where(i => SqlTypes.ContainsKey(i.PropertyType))
-                .Select(i => (i.Name, SqlTypes[i.PropertyType]));
+            var validColumns = types.Where(i => SqlTypes.ContainsKey(i.PropertyType))
+                .Select(i => GetColumnDefinition(i));
 
             var builder = new StringBuilder();
 
-            foreach(var _type in validTypes)
+            count = 0;
+
+            foreach(var column in validColumns)
             {
-                builder.Append($"{_type.Name} {_type.Item2}{(_type == validTypes.Last() ? "" : ",")}");
+                builder.Append($"{column}{(column == validColumns.Last() ? "" : ",")}");
+                count++;
             }
 
             return builder.ToString();
+        }
+
+        private static string GetColumnDefinition(PropertyInfo property)
+        {
+            var name = property.Name;
+            var type = property.PropertyType;
+            var column = SqlTypes[type];
+
+            if (IsIdentityType(type))
+            {
+                column += " IDENTITY(1,1) ";
+            }
+
+            return $"{name} {column}";
+        }
+
+        private static bool IsIdentityType(Type type)
+        {
+            return Attribute.IsDefined(type, typeof(KeyAttribute))
+                && SqlIdentityTypes.Contains(type);
         }
 
         internal static bool ValidProperty(PropertyInfo info)
