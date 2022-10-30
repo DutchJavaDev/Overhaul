@@ -23,7 +23,7 @@ namespace Overhaul.Core.Tests
             };
 
             // Act
-            var definitons = ModelTracker.CreateDefenitions(types);
+            var definitons = ModelTracker.CreateDefinitions(types);
 
             // Assert
             var noAttr = definitons.Where(i => i.DefType.Equals(types[0].Name))
