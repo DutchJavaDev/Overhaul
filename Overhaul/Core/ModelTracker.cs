@@ -13,15 +13,23 @@ namespace Overhaul.Core
         private static IEnumerable<TableDef> _cache;
         public static void Track(IEnumerable<Type> types, string connectionString = "")
         {
-            // Create defenitions
-            _cache = CreateDefenitions(types);
-
-            // 
-
             // If debug read connectionstring from secrets
+            
+            // Check Db
+            _cache = LoadCache();
+
+            // Create definitions
+            var definitions = CreateDefinitions(types);
+
         }
 
-        internal static IEnumerable<TableDef> CreateDefenitions(IEnumerable<Type> types)
+        internal static IEnumerable<TableDef> LoadCache()
+        {
+            return Enumerable.Empty<TableDef>();
+        }
+
+        internal static IEnumerable<TableDef> 
+            CreateDefinitions(IEnumerable<Type> types)
         {
             return types.Select(i => BuildDef(i));
         }
@@ -30,13 +38,15 @@ namespace Overhaul.Core
         {
             var tableName = GetTableName(type);
             var properties = Supported.GetPropertiesForType(type);
-            var columnCollection = Supported.ConvertPropertiesToTypesString(properties);
+            var columnCollection = 
+                Supported.ConvertPropertiesToTypesString(properties, out var count);
 
             return new TableDef 
             {
                 TableName = tableName,
                 ColumnCollection = columnCollection,
-                DefType = type.Name
+                DefType = type.Name,
+                ColumnCount = count
             };
         }
 
