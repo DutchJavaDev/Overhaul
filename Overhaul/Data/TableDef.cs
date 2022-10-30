@@ -2,9 +2,11 @@
 {
     internal sealed class TableDef
     {
+        public Guid Id { get; set; }
         public string TableName { get; set; }
         public string DefType { get; set; }
         public string ColumnCollection { get; set; }
+        public int ColumnCount { get; set; }
 
         public override bool Equals(object obj)
         {
@@ -26,16 +28,18 @@
             return DefType.Equals(other);
         }
 
-        private bool SameColumnCollection(string other)
+        private bool SameColumnCollection(string other, int count)
         {
-            return ColumnCollection.Equals(other);
+            return ColumnCount == count 
+                && ColumnCollection.Equals(other);
         }
 
         private bool Equals(TableDef other)
         {
             return SameTableName(other.TableName)
                 && SameDefType(other.DefType)
-                && SameColumnCollection(other.ColumnCollection);
+                && SameColumnCollection(other.ColumnCollection,
+                other.ColumnCount);
         }
 
         public override int GetHashCode()
