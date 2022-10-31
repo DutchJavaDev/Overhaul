@@ -3,7 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Overhaul.Data;
 using Overhaul.Interface;
 using OverhaulTests;
-using System;
+
 namespace Overhaul.Core.Tests
 {
     [TestClass()]
@@ -15,6 +15,16 @@ namespace Overhaul.Core.Tests
         public void Init()
         {
             model = new SqlGenerator(TestHelper.GetString("devString"));
+        }
+
+        [TestMethod]
+        public void BGetcollectionTest()
+        {
+            // Act
+            var result = model.GetCollection();
+
+            // Assert
+            Assert.IsNotNull(result);
         }
 
         [TestMethod()]
@@ -31,7 +41,7 @@ namespace Overhaul.Core.Tests
         }
 
         [TestMethod()]
-        public void BDeleteTableTest()
+        public void CDeleteTableTest()
         {
             // Arrange
             var def = CreateDef();
@@ -43,7 +53,7 @@ namespace Overhaul.Core.Tests
             Assert.IsTrue(result);
         }
 
-        private TableDef CreateDef()
+        private static TableDef CreateDef()
         {
             var type = typeof(TableClass);
             var def = ModelTracker.CreateDefinitions(new[] { type })

@@ -11,6 +11,7 @@ namespace Overhaul.Interface
         SqlConnection Connection { get; set; }
         
         string ConnectionString { get; init; }
+        IEnumerable<TableDef> GetCollection();
 
         bool CreateTable(TableDef tableDef);
 

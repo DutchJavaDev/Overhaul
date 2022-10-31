@@ -19,11 +19,23 @@ namespace Overhaul.Core
             ConnectionBuilder = new (connectionString);
         }
 
+        public IEnumerable<TableDef> GetCollection()
+        {
+            // Wont work until insert is done 
+            using (Connection = Create())
+            {
+                var sql = $"SELECT * FROM {ModelTracker.GetTableName(typeof(TableDef))}";
+        
+                return Connection.Query<TableDef>(sql);
+            }
+        }
+
         public bool CreateTable(TableDef tableDef)
         {
             using (Connection = Create())
             {
-                var sql = $"CREATE TABLE {tableDef.TableName} ({tableDef.ColumnCollection})";
+                var sql = $"CREATE TABLE {tableDef.TableName} " +
+                    $"({tableDef.ColumnCollection})";
 
                 Connection.ExecuteScalar(sql);
             }

@@ -1,6 +1,7 @@
 ﻿using Dapper.Contrib.Extensions;
 using Overhaul.Common;
 using Overhaul.Data;
+using Overhaul.Interface;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
@@ -11,21 +12,42 @@ namespace Overhaul.Core
     {
         private static readonly string _tablePrefix = "tbl";
         private static IEnumerable<TableDef> _cache;
+        private static ISqlGenerator sqlGenerator;
+        private static ISqlModifier sqlModifier;
+
         public static void Track(IEnumerable<Type> types, string connectionString = "")
         {
-            // If debug read connectionstring from secrets
-            
+            // If debug read connectionstring from secrets?
+            sqlGenerator = new SqlGenerator(connectionString);
+
             // Check Db
             _cache = LoadCache();
 
             // Create definitions
             var definitions = CreateDefinitions(types);
 
+            if (_cache.Any() && definitions.Any())
+            {
+                // Run definition compare
+                    // Add column
+                    // Delete column
+                // Update / Delete
+                // Done
+            }
         }
 
         internal static IEnumerable<TableDef> LoadCache()
         {
-            return Enumerable.Empty<TableDef>();
+            var def = BuildDef(typeof(TableDef));
+
+            if (!sqlGenerator.TableExists(def.TableName))
+            {
+                sqlGenerator.CreateTable(def);
+
+                return Enumerable.Empty<TableDef>();
+            }
+
+            return sqlGenerator.GetCollection();
         }
 
         internal static IEnumerable<TableDef> 
