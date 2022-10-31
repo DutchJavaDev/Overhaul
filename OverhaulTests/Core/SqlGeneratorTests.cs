@@ -1,5 +1,6 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Overhaul.Core;
+﻿using Dapper.Contrib.Extensions;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Overhaul.Data;
 using Overhaul.Interface;
 using OverhaulTests;
 using System;
@@ -13,31 +14,49 @@ namespace Overhaul.Core.Tests
         [TestInitialize]
         public void Init()
         {
-            model = new SqlGenerator(TestHelper.GetConnectionString());
+            model = new SqlGenerator(TestHelper.GetString("devString"));
         }
 
         [TestMethod()]
-        public void SqlGeneratorTest()
+        public void ACreateTableTest()
         {
-            Assert.Fail();
+            // Arrange
+            var def = CreateDef();
+
+            // Act
+            var result = model.CreateTable(def);
+
+            // Assert
+            Assert.IsTrue(result);
         }
 
         [TestMethod()]
-        public void CreateTableTest()
+        public void BDeleteTableTest()
         {
-            Assert.Fail();
+            // Arrange
+            var def = CreateDef();
+
+            // Act
+            var result = model.DeleteTable(def);
+
+            // Assert
+            Assert.IsTrue(result);
         }
 
-        [TestMethod()]
-        public void DeleteTableTest()
+        private TableDef CreateDef()
         {
-            Assert.Fail();
+            var type = typeof(TableClass);
+            var def = ModelTracker.CreateDefinitions(new[] { type })
+                .First();
+            return def;
         }
 
-        [TestMethod()]
-        public void TableExistsTest()
+        [Table("tblTblaClass")]
+        public sealed class TableClass
         {
-            Assert.Fail();
+            public string Name { get; set; } = string.Empty;
+            public int Number { get; set; }
+            public Guid Description { get; set; }
         }
     }
 }
