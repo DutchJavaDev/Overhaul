@@ -23,7 +23,7 @@ namespace Overhaul.Core
         {
             using (Connection = Create())
             {
-                var sql = $"CREAT TABLE ({tableDef.ColumnCollection})";
+                var sql = $"CREATE TABLE {tableDef.TableName} ({tableDef.ColumnCollection})";
 
                 Connection.ExecuteScalar(sql);
             }
@@ -36,6 +36,8 @@ namespace Overhaul.Core
             using (Connection = Create())
             {
                 var sql = $"DROP TABLE {tableDef.TableName}";
+
+                Connection.ExecuteScalar(sql);
             }
 
             return !TableExists(tableDef.TableName);
@@ -43,6 +45,7 @@ namespace Overhaul.Core
 
         public bool TableExists(string name)
         {
+            // Only checks for tables within this databatse [sandbox i guess]
             using (Connection = Create())
             {
                 var sql = $"SELECT COUNT(*) " +
