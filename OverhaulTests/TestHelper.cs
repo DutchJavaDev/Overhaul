@@ -2,30 +2,29 @@
 
 namespace OverhaulTests
 {
-    internal static class TestHelper
+    public static class TestHelper
     {
-        private static string? _cache;
+        private readonly static Dictionary<string, string> _cache = new();
 
-        public static string GetConnectionString()
+        public static string GetString(string section)
         {
-            if(!string.IsNullOrEmpty(_cache))
+            if(_cache.ContainsKey(section))
             {
-                return _cache;
+                return _cache[section];
             }
 
             var environment = Environment.GetEnvironmentVariable("NETCORE_ENVIRONMENT");
-
+            // Could put path i enviroment variables
+            // Researc
             var builder = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json")
-                .AddJsonFile($"appsettings.{environment}.json", optional: true)
+                .AddUserSecrets(typeof(TestHelper).Assembly)
                 .AddEnvironmentVariables();
 
             var configurationRoot = builder.Build();
 
-            
-            _cache = configurationRoot["devString"];
+            _cache[section] = configurationRoot[section];
 
-            return _cache;
+            return _cache[section];
         }
     }
 }
