@@ -45,16 +45,16 @@ namespace Overhaul.Core.Tests
         public void CDeleteTableTest()
         {
             // Arrange
-            var def = CreateDef();
+            var tableName = ModelTracker.GetTableName(typeof(TableClass));
 
             // Act
-            var result = model.DeleteTable(def);
+            var result = model.DeleteTable(tableName);
 
             // Assert
             Assert.IsTrue(result);
         }
 
-        private static TableDef CreateDef()
+        private static TableDefinition CreateDef()
         {
             var type = typeof(TableClass);
             var def = ModelTracker.CreateDefinitions(new[] { type })
