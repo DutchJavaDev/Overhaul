@@ -11,6 +11,6 @@ namespace Overhaul.Interface
         string ConnectionString { get; init; }
         bool AddColumn(string tableName, string nColumn);
 
-        bool DeleteColumn(string columnName);
+        bool DeleteColumn(string tableName, string column);
     }
 }
