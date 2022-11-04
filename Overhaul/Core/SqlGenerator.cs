@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using Dapper.Contrib.Extensions;
 using Overhaul.Data;
 using Overhaul.Interface;
 using System.Data.SqlClient;
@@ -19,18 +20,18 @@ namespace Overhaul.Core
             ConnectionBuilder = new (connectionString);
         }
 
-        public IEnumerable<TableDef> GetCollection()
+        public IEnumerable<TableDefinition> GetCollection()
         {
             // Wont work until insert is done 
             using (Connection = Create())
-            {
-                var sql = $"SELECT * FROM {ModelTracker.GetTableName(typeof(TableDef))}";
+            { 
+                var sql = $"SELECT * FROM {ModelTracker.GetTableName(typeof(TableDefinition))}";
         
-                return Connection.Query<TableDef>(sql);
+                return Connection.Query<TableDefinition>(sql);
             }
         }
 
-        public bool CreateTable(TableDef tableDef)
+        public bool CreateTable(TableDefinition tableDef)
         {
             using (Connection = Create())
             {
@@ -43,16 +44,16 @@ namespace Overhaul.Core
             return TableExists(tableDef.TableName);
         }
 
-        public bool DeleteTable(TableDef tableDef)
+        public bool DeleteTable(string tableName)
         {
             using (Connection = Create())
             {
-                var sql = $"DROP TABLE {tableDef.TableName}";
+                var sql = $"DROP TABLE {tableName}";
 
                 Connection.ExecuteScalar(sql);
             }
 
-            return !TableExists(tableDef.TableName);
+            return !TableExists(tableName);
         }
 
         public bool TableExists(string name)
