@@ -52,6 +52,71 @@ namespace Overhaul.Common.Tests
             Assert.AreEqual(expectedSql, strQuery);
             Assert.AreEqual(11, count);
         }
+
+        [TestMethod]
+        public void GetAddedColumnsTest()
+        {
+            // Arrange
+            var self = Supported.ConvertTypesStringToArray("Int INT,String NVARCHAR(255)," +
+                                 "Float FLOAT,Decimal DECIMAL," +
+                                 "Char CHAR(2),Double FLOAT," +
+                                 "Guid UNIQUEIDENTIFIER," +
+                                 "Short SMALLINT,Byte TINYINT," +
+                                 "Bool BIT");
+            var other = Supported.ConvertTypesStringToArray("Int INT,String NVARCHAR(255)," +
+                                 "Float FLOAT,Decimal DECIMAL," +
+                                 "Char CHAR(2),Double FLOAT," +
+                                 "Guid UNIQUEIDENTIFIER," +
+                                 "Short SMALLINT,Byte TINYINT," +
+                                 "Bool BIT,DateTime DATETIME");
+
+            // Act
+            var result = Supported.GetAddedColumns(self, other);
+
+            // Assert
+            Assert.AreEqual("DateTime DATETIME", result.First());
+        }
+
+        [TestMethod]
+        public void GetDeleteColumnsTest()
+        {
+            // Arrange
+            var self = Supported.ConvertTypesStringToArray("Int INT,String NVARCHAR(255)," +
+                                 "Float FLOAT,Decimal DECIMAL," +
+                                 "Char CHAR(2),Double FLOAT," +
+                                 "Guid UNIQUEIDENTIFIER," +
+                                 "Short SMALLINT,Byte TINYINT," +
+                                 "Bool BIT, DateTime DATETIME");
+            var other = Supported.ConvertTypesStringToArray("Int INT,String NVARCHAR(255)," +
+                                 "Float FLOAT,Decimal DECIMAL," +
+                                 "Char CHAR(2),Double FLOAT," +
+                                 "Guid UNIQUEIDENTIFIER," +
+                                 "Short SMALLINT,Byte TINYINT," +
+                                 "Bool BIT");
+
+            // Act
+            var result = Supported.GetDeletedColumns(self, other);
+
+            // Assert
+            Assert.AreEqual("DateTime DATETIME", result.First());
+        }
+
+
+
+        [TestMethod]
+        public void ConvertTypesStringToArray()
+        {
+            // Arrange
+            var types = Supported.GetPropertiesForType(_type);
+            var strQuery = Supported.ConvertPropertiesToTypesString(types, out int count);
+
+            // Act
+            var strQueryArray = Supported.ConvertTypesStringToArray(strQuery);
+
+            // Assert
+            Assert.AreEqual(types.Length,strQueryArray.Length);
+        }
+
         public sealed class SupportedTypesClass
         {
             public int Int { get; set; }
