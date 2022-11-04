@@ -1,8 +1,13 @@
-﻿namespace Overhaul.Data
+﻿using Dapper.Contrib.Extensions;
+using Overhaul.Common;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Overhaul.Data
 {
-    internal sealed class TableDef
+    internal sealed class TableDefinition
     {
-        public Guid Id { get; set; }
+        [Key]
+        public int Id { get; set; }
         public string TableName { get; set; }
         public string DefType { get; set; }
         public string ColumnCollection { get; set; }
@@ -10,7 +15,7 @@
 
         public override bool Equals(object obj)
         {
-            if (obj is TableDef other)
+            if (obj is TableDefinition other)
             {
                 return Equals(other);
             }
@@ -34,12 +39,13 @@
                 && ColumnCollection.Equals(other);
         }
 
-        private bool Equals(TableDef other)
+        private bool Equals(TableDefinition other)
         {
-            return SameTableName(other.TableName)
-                && SameDefType(other.DefType)
-                && SameColumnCollection(other.ColumnCollection,
+            var tabelName = SameTableName(other.TableName);
+             var defType = SameDefType(other.DefType);
+             var columnCount = SameColumnCollection(other.ColumnCollection,
                 other.ColumnCount);
+            return tabelName && defType && columnCount;
         }
 
         public override int GetHashCode()
