@@ -11,11 +11,11 @@ namespace Overhaul.Interface
         SqlConnection Connection { get; set; }
         
         string ConnectionString { get; init; }
-        IEnumerable<TableDef> GetCollection();
+        IEnumerable<TableDefinition> GetCollection();
 
-        bool CreateTable(TableDef tableDef);
+        bool CreateTable(TableDefinition tableDef);
 
-        bool DeleteTable(TableDef tableDef);
+        bool DeleteTable(string tableName);
 
         bool TableExists(string name);
     }
