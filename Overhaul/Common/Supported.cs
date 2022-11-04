@@ -1,4 +1,7 @@
 ﻿using Dapper.Contrib.Extensions;
+
+using Overhaul.Data.Attributes;
+
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -53,6 +56,32 @@ namespace Overhaul.Common
             return builder.ToString();
         }
 
+        public static string[] ConvertTypesStringToArray(string types)
+        {
+            // Redo this lol
+            var strA = new List<string>();
+            foreach (var type in types.Split(","))
+            {
+                strA.Add(type.Trim());
+            }
+            return strA.ToArray();
+        }
+
+        public static IEnumerable<string> GetAddedColumns(string[] self, string[] other)
+        {
+            return GetDifferenceFromCollections(other,self);
+        }
+
+        public static IEnumerable<string> GetDeletedColumns(string[] self, string[] other)
+        {
+            return GetDifferenceFromCollections(self, other);
+        }
+
+        private static IEnumerable<T> GetDifferenceFromCollections<T>(IEnumerable<T> source, IEnumerable<T> target)
+        {
+            return source.Where(i => !target.Contains(i));
+        }
+
         private static string GetColumnDefinition(PropertyInfo property)
         {
             var name = property.Name;
@@ -64,13 +93,24 @@ namespace Overhaul.Common
                 column += " IDENTITY(1,1) ";
             }
 
+            if (IsDefined(property, typeof(StringPrecisionAttribute))
+                && property.GetCustomAttribute<StringPrecisionAttribute>() is
+                StringPrecisionAttribute strab)
+            {
+                column = column.Replace("(255)",strab.Precision);
+            }
+
             return $"{name} {column}";
         }
 
         private static bool IsIdentityType(Type type)
         {
-            return Attribute.IsDefined(type, typeof(KeyAttribute))
+            return IsDefined(type, typeof(KeyAttribute))
                 && SqlIdentityTypes.Contains(type);
+        }
+        private static bool IsDefined(MemberInfo info, Type attribute)
+        {
+            return Attribute.IsDefined(info, attribute);
         }
 
         internal static bool ValidProperty(PropertyInfo info)
