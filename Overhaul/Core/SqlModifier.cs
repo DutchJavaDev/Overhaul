@@ -1,9 +1,10 @@
-﻿using Overhaul.Interface;
+﻿using Dapper;
+using Overhaul.Interface;
 using System.Data.SqlClient;
 
 namespace Overhaul.Core
 {
-    internal sealed class SqlModifier : ISqlModifier
+    public sealed class SqlModifier : ISqlModifier
     {
         public SqlConnectionStringBuilder ConnectionBuilder { get; init; }
         public SqlConnection Connection { get; set; }
@@ -15,14 +16,37 @@ namespace Overhaul.Core
             ConnectionString = connectionString;
             ConnectionBuilder = new(connectionString);
         }
+
         public bool AddColumn(string tableName, string nColumn)
         {
+            var sql = $"ALTER TABLE {tableName} ADD {nColumn}";
+
+            using (var con = Create())
+            {
+                con.ExecuteScalar(sql);
+            }
+
             return true;
         }
 
-        public bool DeleteColumn(string columnName)
+        public bool DeleteColumn(string tableName, string column)
         {
-            return false;
+            // Data loss protection for now, see what happens 
+            var sql = $"ALTER TABLE {tableName} ALTER COLUMN {column}" +
+                $"{(column.Contains("NULL") ? "" : " NULL")}";
+
+            using (var con = Create())
+            {
+                con.ExecuteScalar(sql);
+            }
+            return true;
+        }
+
+        private SqlConnection Create()
+        {
+            Connection = new SqlConnection(ConnectionString);
+            Connection.Open();
+            return Connection;
         }
     }
 }
