@@ -1,4 +1,5 @@
 ﻿using System.Data.SqlClient;
+using System.Runtime.CompilerServices;
 
 using Dapper;
 using Dapper.Contrib.Extensions;
@@ -6,6 +7,7 @@ using Dapper.Contrib.Extensions;
 using Overhaul.Data;
 using Overhaul.Interface;
 
+[assembly: InternalsVisibleTo("OverhaulTests")]
 namespace Overhaul.Core
 {
     internal sealed class Crud : ICrud
