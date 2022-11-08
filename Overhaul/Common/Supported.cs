@@ -101,8 +101,6 @@ namespace Overhaul.Common
                 PrecisionAttribute strab)
             {
                 column = Regex.Replace(column,"/[1-9]{1,3}/mg", strab.Precision);
-
-                column = column.Replace("(255)",strab.Precision);
             }
 
             return $"{name} {column}";
