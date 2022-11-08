@@ -26,9 +26,10 @@ namespace Overhaul.Core
             // Check Db
             _cache = LoadCache();
 
-
             if (definitions.Any())
             {
+                RunSchemaDelete(_cache.Where(i => !definitions.Any(ii => i == ii)));
+
                 RunSchemaCreate(definitions.Where(i => 
                 !_cache.Any(ii => ii.DefType == i.DefType)));
 
@@ -40,38 +41,33 @@ namespace Overhaul.Core
 
         internal static void RunSchemaCreate(IEnumerable<TableDefinition> addedTables)
         {
-            foreach(var table in addedTables)
-            {
-                sqlGenerator.CreateTable(table);
-            }
+            addedTables.AsParallel().ForAll(i => sqlGenerator.CreateTable(i));
         }
 
-        internal static void RunSchemaUpdate(IEnumerable<TableDefinition> modifiedTabes)
+        internal static void RunSchemaDelete(IEnumerable<TableDefinition> deleteTables)
         {
-            foreach (var table in modifiedTabes)
-            {
-                var oldType = _cache.Where(i => i.DefType == table.DefType).First();
-
-                var oldTypeColumnArray = Supported.ConvertTypesStringToArray(oldType.ColumnCollection);
-
-                var newTypeColumnArray = Supported.ConvertTypesStringToArray(table.ColumnCollection);
-
-                var addedColumns = Supported.GetAddedColumns(oldTypeColumnArray, newTypeColumnArray);
-
-                var deletedColumns = Supported.GetDeletedColumns(oldTypeColumnArray, newTypeColumnArray);
-
-                foreach(var column in addedColumns)
-                {
-                    sqlModifier.AddColumn(table.TableName, column);
-                }
-
-                foreach(var column in deletedColumns)
-                {
-                    sqlModifier.DeleteColumn(table.TableName, column);
-                }
-            }
+            deleteTables.AsParallel().ForAll(i => sqlGenerator.DeleteTable(i.TableName));
         }
 
+        internal static void RunSchemaUpdate(IEnumerable<TableDefinition> modifiedTables)
+        {
+            modifiedTables.AsParallel().ForAll(newType =>
+            {
+                var oldType = _cache.Where(i => i.DefType == newType.DefType).First();
+                GetChanges(newType, oldType, out IEnumerable<string> addedColumns, out IEnumerable<string> deletedColumns);
+                addedColumns.AsParallel().ForAll(column => sqlModifier.AddColumn(newType.TableName, column));
+                deletedColumns.AsParallel().ForAll(column => sqlModifier.DeleteColumn(newType.TableName, column));
+            });
+        }
+
+        private static void GetChanges(TableDefinition table, TableDefinition oldType,
+            out IEnumerable<string> addedColumns, out IEnumerable<string> deletedColumns)
+        {
+            var oldTypeColumnArray = Supported.ConvertTypesStringToArray(oldType.ColumnCollection);
+            var newTypeColumnArray = Supported.ConvertTypesStringToArray(table.ColumnCollection);
+            addedColumns = Supported.GetAddedColumns(oldTypeColumnArray, newTypeColumnArray);
+            deletedColumns = Supported.GetDeletedColumns(oldTypeColumnArray, newTypeColumnArray);
+        }
 
         internal static IEnumerable<TableDefinition> LoadCache()
         {
@@ -80,8 +76,7 @@ namespace Overhaul.Core
             if (!sqlGenerator.TableExists(def.TableName))
             {
                 sqlGenerator.CreateTable(def);
-
-
+                // Define system tables
                 // Don't return def since it has just been created
                 // Otherwise it will trigger a create table ... again
                 return Enumerable.Empty<TableDefinition>();
@@ -94,7 +89,7 @@ namespace Overhaul.Core
         internal static IEnumerable<TableDefinition> 
             CreateDefinitions(IEnumerable<Type> types)
         {
-            return types.Select(i => BuildDef(i));
+            return types.AsParallel().Select(i => BuildDef(i));
         }
 
         // Move to class

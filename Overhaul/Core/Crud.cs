@@ -57,15 +57,14 @@ namespace Overhaul.Core
 
         private string GetTableName(Type t)
         {
-            var name = _tableDefCache.Where(i => i.DefType == t.Name)
-                .FirstOrDefault().TableName;
+            var items = _tableDefCache.Where(i => i.DefType == t.Name);
 
-            if (string.IsNullOrEmpty(name))
+            if (items.Any())
             {
-                return ModelTracker.GetTableName(t);
+                return items.First().TableName;
             }
 
-            return name;
+            return ModelTracker.GetTableName(t);
         }
     }
 }
