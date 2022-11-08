@@ -27,7 +27,7 @@ namespace Overhaul.Data.Attributes.Tests
 
         public sealed class AttributeTests
         {
-            [StringPrecision(1024)]
+            [Precision(1024)]
             public string BingoPlayer { get; set; }
         }
     }
