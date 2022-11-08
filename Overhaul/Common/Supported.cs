@@ -5,6 +5,7 @@ using Overhaul.Data.Attributes;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.RegularExpressions;
 
 [assembly: InternalsVisibleTo("OverhaulTests")]
 namespace Overhaul.Common
@@ -31,6 +32,8 @@ namespace Overhaul.Common
             typeof(int),
             typeof(Guid),
         };
+
+
 
         public static PropertyInfo[] GetPropertiesForType(Type type)
         {
@@ -93,10 +96,12 @@ namespace Overhaul.Common
                 column += " IDENTITY(1,1) ";
             }
 
-            if (IsDefined(property, typeof(StringPrecisionAttribute))
-                && property.GetCustomAttribute<StringPrecisionAttribute>() is
-                StringPrecisionAttribute strab)
+            if (IsDefined(property, typeof(PrecisionAttribute))
+                && property.GetCustomAttribute<PrecisionAttribute>() is
+                PrecisionAttribute strab)
             {
+                column = Regex.Replace(column,"/[1-9]{1,3}/mg", strab.Precision);
+
                 column = column.Replace("(255)",strab.Precision);
             }
 
@@ -111,6 +116,12 @@ namespace Overhaul.Common
         private static bool IsDefined(MemberInfo info, Type attribute)
         {
             return Attribute.IsDefined(info, attribute);
+        }
+
+        private static Regex CreateRegex(string str)
+        { 
+            var regex = new Regex(str, RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            return regex;
         }
 
         internal static bool ValidProperty(PropertyInfo info)
