@@ -1,13 +1,14 @@
 ﻿namespace Overhaul.Data.Attributes
 {
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
-    public class PrecisionAttribute : Attribute
+    public sealed class PrecisionAttribute : Attribute
     {
         public string Precision { get; init; }
 
-        public PrecisionAttribute(int precision)
+        public PrecisionAttribute(object precision)
         {
-            Precision = $"({precision})";
+            
+            Precision = precision.ToString().Replace(".",",");
         }
     }
 }
