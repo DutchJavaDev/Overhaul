@@ -100,7 +100,14 @@ namespace Overhaul.Common
                 && property.GetCustomAttribute<PrecisionAttribute>() is
                 PrecisionAttribute strab)
             {
-                column = Regex.Replace(column,"/[1-9]{1,3}/mg", strab.Precision);
+                if (column.Contains('('))
+                {
+                    column = Regex.Replace(column, "[1-9]{1,}", strab.Precision);
+                }
+                else
+                {
+                    column += $"({strab.Precision})";
+                }
             }
 
             return $"{name} {column}";
