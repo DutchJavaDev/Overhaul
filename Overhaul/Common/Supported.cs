@@ -33,8 +33,6 @@ namespace Overhaul.Common
             typeof(Guid),
         };
 
-
-
         public static PropertyInfo[] GetPropertiesForType(Type type)
         {
             return type.GetProperties().Where(i => ValidProperty(i))
@@ -52,7 +50,7 @@ namespace Overhaul.Common
 
             foreach(var column in validColumns)
             {
-                builder.Append($"{column}{(column == validColumns.Last() ? "" : ",")}");
+                builder.Append($"{column}{(column == validColumns.Last() ? "" : ";")}");
                 count++;
             }
 
@@ -61,18 +59,12 @@ namespace Overhaul.Common
 
         public static string[] ConvertTypesStringToArray(string types)
         {
-            // Redo this lol
-            var strA = new List<string>();
-            foreach (var type in types.Split(","))
-            {
-                strA.Add(type.Trim());
-            }
-            return strA.ToArray();
+            return types.Split(";").Select(i => i.Trim()).ToArray();
         }
 
         public static IEnumerable<string> GetAddedColumns(string[] self, string[] other)
         {
-            return GetDifferenceFromCollections(other,self);
+            return GetDifferenceFromCollections(other, self);
         }
 
         public static IEnumerable<string> GetDeletedColumns(string[] self, string[] other)

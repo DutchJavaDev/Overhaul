@@ -1,13 +1,6 @@
 ﻿using Dapper.Contrib.Extensions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-using Overhaul.Core;
 using Overhaul.Interface;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Overhaul.Core.Tests
 {
@@ -16,6 +9,9 @@ namespace Overhaul.Core.Tests
     {
         // Model
         private ICrud model;
+
+        // Helpers
+        private readonly Type[] Types = new[] { typeof(Document) }; 
 
         [TestInitialize]
         public void Init()
@@ -53,14 +49,23 @@ namespace Overhaul.Core.Tests
             Assert.Fail();
         }
 
-
+        [Table("tblSecreteDocumentsForTest")]
         public sealed class Document
         {
             [Key]
             public int DocumentId { get; set; }
             public int DocumentNumber { get; set; }
-            public string DocumentTitle { get; set; } = string.Empty;
-            public bool Valid { get; set; }
+            public int Int { get; set; }
+            public string String { get; set; } = string.Empty;
+            public float Float { get; set; }
+            public decimal Decimal { get; set; }
+            public char Char { get; set; }
+            public double Double { get; set; }
+            public Guid Guid { get; set; }
+            public short Short { get; set; }
+            public byte Byte { get; set; }
+            public bool Bool { get; set; }
+            public DateTime DateTime { get; set; }
         }
     }
 }

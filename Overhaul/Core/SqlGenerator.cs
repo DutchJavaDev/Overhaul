@@ -1,9 +1,8 @@
-﻿using Dapper;
-using Dapper.Contrib.Extensions;
+﻿using System.Data.SqlClient;
+using System.Runtime.CompilerServices;
+using Dapper;
 using Overhaul.Data;
 using Overhaul.Interface;
-using System.Data.SqlClient;
-using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("OverhaulTests")]
 namespace Overhaul.Core
@@ -36,7 +35,7 @@ namespace Overhaul.Core
             using (Connection = Create())
             {
                 var sql = $"CREATE TABLE {tableDef.TableName} " +
-                    $"({tableDef.ColumnCollection})";
+                    $"({tableDef.ColumnCollection.Replace(";",",")})";
 
                 Connection.ExecuteScalar(sql);
             }

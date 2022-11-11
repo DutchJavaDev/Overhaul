@@ -12,6 +12,7 @@ namespace Overhaul.Core.Tests
         {
             Assert.IsTrue(true);
         }
+
         [TestMethod]
         public void CreateDefenitionsTest()
         {

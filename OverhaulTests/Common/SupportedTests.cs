@@ -42,12 +42,12 @@ namespace Overhaul.Common.Tests
             var strQuery = Supported.ConvertPropertiesToTypesString(types, out int count);
 
             // Assert
-            var expectedSql = "Int INT,String NVARCHAR(255),"+
-                                 "Float FLOAT,Decimal DECIMAL,"+
-                                 "Char CHAR(2),Double FLOAT,"+
-                                 "Guid UNIQUEIDENTIFIER,"+
-                                 "Short SMALLINT,Byte TINYINT,"+ 
-                                 "Bool BIT,DateTime DATETIME";
+            var expectedSql = "Int INT;String NVARCHAR(255);"+
+                                 "Float FLOAT;Decimal DECIMAL;"+
+                                 "Char CHAR(2);Double FLOAT;"+
+                                 "Guid UNIQUEIDENTIFIER;"+
+                                 "Short SMALLINT;Byte TINYINT;"+ 
+                                 "Bool BIT;DateTime DATETIME";
 
             Assert.AreEqual(expectedSql, strQuery);
             Assert.AreEqual(11, count);
@@ -57,18 +57,18 @@ namespace Overhaul.Common.Tests
         public void GetAddedColumnsTest()
         {
             // Arrange
-            var self = Supported.ConvertTypesStringToArray("Int INT,String NVARCHAR(255)," +
-                                 "Float FLOAT,Decimal DECIMAL," +
-                                 "Char CHAR(2),Double FLOAT," +
-                                 "Guid UNIQUEIDENTIFIER," +
-                                 "Short SMALLINT,Byte TINYINT," +
+            var self = Supported.ConvertTypesStringToArray("Int INT;String NVARCHAR(255);" +
+                                 "Float FLOAT;Decimal DECIMAL;" +
+                                 "Char CHAR(2);Double FLOAT;" +
+                                 "Guid UNIQUEIDENTIFIER;" +
+                                 "Short SMALLINT;Byte TINYINT;" +
                                  "Bool BIT");
-            var other = Supported.ConvertTypesStringToArray("Int INT,String NVARCHAR(255)," +
-                                 "Float FLOAT,Decimal DECIMAL," +
-                                 "Char CHAR(2),Double FLOAT," +
-                                 "Guid UNIQUEIDENTIFIER," +
-                                 "Short SMALLINT,Byte TINYINT," +
-                                 "Bool BIT,DateTime DATETIME");
+            var other = Supported.ConvertTypesStringToArray("Int INT;String NVARCHAR(255);" +
+                                 "Float FLOAT;Decimal DECIMAL;" +
+                                 "Char CHAR(2);Double FLOAT;" +
+                                 "Guid UNIQUEIDENTIFIER;" +
+                                 "Short SMALLINT;Byte TINYINT;" +
+                                 "Bool BIT;DateTime DATETIME");
 
             // Act
             var result = Supported.GetAddedColumns(self, other);
@@ -81,17 +81,17 @@ namespace Overhaul.Common.Tests
         public void GetDeleteColumnsTest()
         {
             // Arrange
-            var self = Supported.ConvertTypesStringToArray("Int INT,String NVARCHAR(255)," +
-                                 "Float FLOAT,Decimal DECIMAL," +
-                                 "Char CHAR(2),Double FLOAT," +
-                                 "Guid UNIQUEIDENTIFIER," +
-                                 "Short SMALLINT,Byte TINYINT," +
-                                 "Bool BIT, DateTime DATETIME");
-            var other = Supported.ConvertTypesStringToArray("Int INT,String NVARCHAR(255)," +
-                                 "Float FLOAT,Decimal DECIMAL," +
-                                 "Char CHAR(2),Double FLOAT," +
-                                 "Guid UNIQUEIDENTIFIER," +
-                                 "Short SMALLINT,Byte TINYINT," +
+            var self = Supported.ConvertTypesStringToArray("Int INT;String NVARCHAR(255);" +
+                                 "Float FLOAT;Decimal DECIMAL;" +
+                                 "Char CHAR(2);Double FLOAT;" +
+                                 "Guid UNIQUEIDENTIFIER;" +
+                                 "Short SMALLINT;Byte TINYINT;" +
+                                 "Bool BIT; DateTime DATETIME");
+            var other = Supported.ConvertTypesStringToArray("Int INT;String NVARCHAR(255);" +
+                                 "Float FLOAT;Decimal DECIMAL;" +
+                                 "Char CHAR(2);Double FLOAT;" +
+                                 "Guid UNIQUEIDENTIFIER;" +
+                                 "Short SMALLINT;Byte TINYINT;" +
                                  "Bool BIT");
 
             // Act

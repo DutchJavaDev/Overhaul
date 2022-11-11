@@ -1,6 +1,4 @@
 ﻿using Dapper.Contrib.Extensions;
-using Overhaul.Common;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Overhaul.Data
 {

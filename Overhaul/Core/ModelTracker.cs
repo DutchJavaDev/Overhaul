@@ -1,9 +1,9 @@
-﻿using Dapper.Contrib.Extensions;
+﻿using System.Reflection;
+using System.Runtime.CompilerServices;
+using Dapper.Contrib.Extensions;
 using Overhaul.Common;
 using Overhaul.Data;
 using Overhaul.Interface;
-using System.Reflection;
-using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("OverhaulTests")]
 namespace Overhaul.Core
@@ -14,59 +14,33 @@ namespace Overhaul.Core
         private static IEnumerable<TableDefinition> _cache;
         private static ISqlGenerator sqlGenerator;
         private static ISqlModifier sqlModifier;
+        private static ISchemaManager schemaManager;
 
         public static void Track(IEnumerable<Type> types, string connectionString = "")
         {
             // If debug read connectionstring from secrets?
             sqlGenerator = new SqlGenerator(connectionString);
+            sqlModifier = new SqlModifier(connectionString);
 
-            // Create definitions
-            var definitions = CreateDefinitions(types);
-            
             // Check Db
             _cache = LoadCache();
 
+            schemaManager = new SchemaManager(sqlGenerator,sqlModifier);
+            
+            // Create definitions
+            var definitions = CreateDefinitions(types);
+            
             if (definitions.Any())
             {
-                RunSchemaDelete(_cache.Where(i => !definitions.Any(ii => i == ii)));
+                schemaManager.RunSchemaDelete(_cache.Where(i => !definitions.Any(ii => i == ii)));
 
-                RunSchemaCreate(definitions.Where(i => 
+                schemaManager.RunSchemaCreate(definitions.Where(i => 
                 !_cache.Any(ii => ii.DefType == i.DefType)));
 
                 // DefType are the same but columns don't match up
-                RunSchemaUpdate(definitions.Where(i
-                    => _cache.Any(ii => ii.DefType == i.DefType && !i.Equals(ii))));
+                schemaManager.RunSchemaUpdate(definitions.Where(i
+                    => _cache.Any(ii => ii.DefType == i.DefType && !i.Equals(ii))), _cache);
             }
-        }
-
-        internal static void RunSchemaCreate(IEnumerable<TableDefinition> addedTables)
-        {
-            addedTables.AsParallel().ForAll(i => sqlGenerator.CreateTable(i));
-        }
-
-        internal static void RunSchemaDelete(IEnumerable<TableDefinition> deleteTables)
-        {
-            deleteTables.AsParallel().ForAll(i => sqlGenerator.DeleteTable(i.TableName));
-        }
-
-        internal static void RunSchemaUpdate(IEnumerable<TableDefinition> modifiedTables)
-        {
-            modifiedTables.AsParallel().ForAll(newType =>
-            {
-                var oldType = _cache.Where(i => i.DefType == newType.DefType).First();
-                GetChanges(newType, oldType, out IEnumerable<string> addedColumns, out IEnumerable<string> deletedColumns);
-                addedColumns.AsParallel().ForAll(column => sqlModifier.AddColumn(newType.TableName, column));
-                deletedColumns.AsParallel().ForAll(column => sqlModifier.DeleteColumn(newType.TableName, column));
-            });
-        }
-
-        private static void GetChanges(TableDefinition table, TableDefinition oldType,
-            out IEnumerable<string> addedColumns, out IEnumerable<string> deletedColumns)
-        {
-            var oldTypeColumnArray = Supported.ConvertTypesStringToArray(oldType.ColumnCollection);
-            var newTypeColumnArray = Supported.ConvertTypesStringToArray(table.ColumnCollection);
-            addedColumns = Supported.GetAddedColumns(oldTypeColumnArray, newTypeColumnArray);
-            deletedColumns = Supported.GetDeletedColumns(oldTypeColumnArray, newTypeColumnArray);
         }
 
         internal static IEnumerable<TableDefinition> LoadCache()
