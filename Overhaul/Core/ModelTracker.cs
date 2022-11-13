@@ -30,7 +30,7 @@ namespace Overhaul.Core
             // Create definitions
             var definitions = CreateDefinitions(types);
             
-            if (definitions.Any())
+            if (definitions.Any() && _cache.Any())
             {
                 schemaManager.RunSchemaDelete(_cache.Where(i => !definitions.Any(ii => i == ii)));
 
@@ -38,6 +38,7 @@ namespace Overhaul.Core
                 !_cache.Any(ii => ii.DefType == i.DefType)));
 
                 // DefType are the same but columns don't match up
+                // ovvriden queals for tableDef
                 schemaManager.RunSchemaUpdate(definitions.Where(i
                     => _cache.Any(ii => ii.DefType == i.DefType && !i.Equals(ii))), _cache);
             }
@@ -76,7 +77,7 @@ namespace Overhaul.Core
 
             return new TableDefinition 
             {
-                TableName = tableName,
+                TableName = GetTableName(tableName),
                 ColumnCollection = columnCollection,
                 DefType = type.Name,
                 ColumnCount = count,
@@ -93,6 +94,14 @@ namespace Overhaul.Core
                 return $"{_tablePrefix}{table.Name}";
             }
             return $"{_tablePrefix}{type.Name}";
+        }
+
+        public static string GetTableName(string name)
+        {
+            if (!name.Contains(_tablePrefix))
+                return _tablePrefix+name;
+
+            return name;
         }
     }
 }

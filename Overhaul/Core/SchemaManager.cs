@@ -26,7 +26,11 @@ namespace Overhaul.Core
         {
             modifiedTables.AsParallel().ForAll(newType =>
             {
-                var oldType = _cache.Where(i => i.DefType == newType.DefType).First();
+                var oldType = _cache.Where(i => i.DefType == newType.DefType
+#if DEBUG
+                || i.TableName == newType.TableName
+#endif
+                ).FirstOrDefault();
                 GetChanges(newType, oldType, out IEnumerable<string> addedColumns, out IEnumerable<string> deletedColumns);
                 deletedColumns.AsParallel().ForAll(column => sqlModifier.DeleteColumn(newType.TableName, column));
                 addedColumns.AsParallel().ForAll(column => sqlModifier.AddColumn(newType.TableName, column));

@@ -45,8 +45,13 @@ namespace Overhaul.Core
 
         public bool DeleteTable(string tableName)
         {
+            if (!TableExists(tableName))
+                    return true;
+
             using (Connection = Create())
             {
+                tableName = ModelTracker.GetTableName(tableName);
+
                 var sql = $"DROP TABLE {tableName}";
 
                 Connection.ExecuteScalar(sql);
@@ -60,6 +65,8 @@ namespace Overhaul.Core
             // Only checks for tables within this databatse [sandbox i guess]
             using (Connection = Create())
             {
+                name = ModelTracker.GetTableName(name);
+
                 var sql = $"SELECT COUNT(*) " +
                           $"FROM INFORMATION_SCHEMA.TABLES " +
                           $"WHERE TABLE_NAME = @tableName;";
