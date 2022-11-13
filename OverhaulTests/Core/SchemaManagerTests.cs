@@ -5,7 +5,6 @@ using Overhaul.Data;
 using Overhaul.Data.Attributes;
 using Overhaul.Interface;
 using OverhaulTests;
-using System.Runtime.CompilerServices;
 
 namespace Overhaul.Core.Tests
 {
@@ -18,6 +17,7 @@ namespace Overhaul.Core.Tests
         // Parameters
         private ISqlGenerator sqlGenerator;
         private ISqlModifier sqlModifier;
+        private const string TableName = "mod";
 
         [TestInitialize]
         public void Init()
@@ -28,6 +28,8 @@ namespace Overhaul.Core.Tests
             sqlModifier = new SqlModifier(connection);
 
             model = new SchemaManager(sqlGenerator,sqlModifier);
+
+            sqlGenerator.DeleteTable(TableName);
         }
 
         [TestMethod()]
@@ -38,18 +40,42 @@ namespace Overhaul.Core.Tests
 
             // Act
             model.RunSchemaCreate(types);
+
+            // Assert
+            Assert.IsTrue(sqlGenerator.TableExists(TableName));
         }
 
         [TestMethod()]
         public void RunSchemaUpdateTest()
         {
-            Assert.Fail();
+            // Arrange
+            var types = CreateDefinitions();
+            var types2 = CreateDefinitions2();
+
+            // Act
+            model.RunSchemaCreate(types);
+            model.RunSchemaUpdate(types2, types);
+
+            // Assert
+            Assert.IsTrue(sqlGenerator.TableExists(TableName));
         }
 
         [TestMethod()]
         public void RunSchemaDeleteTest()
         {
-            Assert.Fail();
+            // Arrange
+            var types = CreateDefinitions();
+            var types2 = CreateDefinitions2();
+            var types3 = CreateDefinitions3();
+
+            // Act
+            model.RunSchemaCreate(types);
+            model.RunSchemaUpdate(types2, types);
+            model.RunSchemaUpdate(types3, types2);
+            model.RunSchemaDelete(types3);
+
+            // Assert
+            Assert.IsTrue(!sqlGenerator.TableExists(TableName));
         }
 
         private IEnumerable<TableDefinition> CreateDefinitions()
@@ -80,7 +106,7 @@ namespace Overhaul.Core.Tests
             return ModelTracker.CreateDefinitions(types);
         }
 
-        [Table("mod")]
+        [Table(TableName)]
         sealed class ModifiedClass
         {
             public string Id { get; set; }
@@ -88,7 +114,7 @@ namespace Overhaul.Core.Tests
             public bool BitSet { get; set; }
         }
 
-        [Table("mod")]
+        [Table(TableName)]
         sealed class ModifiedClass2
         {
             public string Id { get; set; }
@@ -97,7 +123,7 @@ namespace Overhaul.Core.Tests
             public float Cat { get; set; }
         }
 
-        [Table("mod")]
+        [Table(TableName)]
         sealed class ModifiedClass3
         {
             public string Id { get; set; }
