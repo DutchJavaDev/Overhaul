@@ -30,7 +30,7 @@ namespace Overhaul.Core
             // Create definitions
             var definitions = CreateDefinitions(types);
             
-            if (definitions.Any() && _cache.Any())
+            if (definitions.Any() || _cache.Any())
             {
                 schemaManager.RunSchemaDelete(_cache.Where(i => !definitions.Any(ii => i == ii)));
 
@@ -64,7 +64,8 @@ namespace Overhaul.Core
                 return Enumerable.Empty<TableDefinition>();
             }
 
-            return sqlGenerator.GetCollection();
+            return sqlGenerator.GetCollection()
+                .Where(i => i.Id > 1); // Skipping Tabledef, will get deleted since its not part of the 'new' types
         }
 
         // Move to class
@@ -103,7 +104,7 @@ namespace Overhaul.Core
             return type.Name;
         }
 
-        public static void DeleteTestTables(Type[] tables, string conn = "")
+        public static void DeleteTestTables(Type[] tables, string conn = "", bool deleteDef = false)
         {
 
             if (sqlGenerator == null || !string.IsNullOrEmpty(conn))
@@ -111,7 +112,15 @@ namespace Overhaul.Core
                 sqlGenerator = new SqlGenerator(conn);
             }
 
-            var types = tables.Select(i => BuildDef(i));
+            var del = tables.ToList();
+
+            if (deleteDef)
+            {
+                // Auto delete this fucker
+                del.Add(typeof(TableDefinition));
+            }
+
+            var types = del.Select(i => BuildDef(i)).ToList();
 
             foreach (var table in types)
             {

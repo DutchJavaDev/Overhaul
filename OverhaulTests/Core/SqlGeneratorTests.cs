@@ -11,10 +11,16 @@ namespace Overhaul.Core.Tests
     {
         private ISqlGenerator model { get; set; }
 
+        private static Type Type = typeof(TableClass);
+
         [TestInitialize]
         public void Init()
         {
-            model = new SqlGenerator(TestHelper.GetString("devString"));
+            var connection = TestHelper.GetString("devString");
+
+            model = new SqlGenerator(connection);
+
+            ModelTracker.DeleteTestTables(new[] { Type }, connection);
         }
 
         // exclude until fixed
@@ -56,8 +62,7 @@ namespace Overhaul.Core.Tests
 
         private static TableDefinition CreateDef()
         {
-            var type = typeof(TableClass);
-            var def = ModelTracker.CreateDefinitions(new[] { type })
+            var def = ModelTracker.CreateDefinitions(new[] { Type })
                 .First();
             return def;
         }

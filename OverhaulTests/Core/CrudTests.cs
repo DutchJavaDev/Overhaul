@@ -12,16 +12,17 @@ namespace Overhaul.Core.Tests
         private ICrud model;
 
         // Helpers
-        private readonly Type[] Types = new[] { typeof(Document) }; 
+        private readonly Type[] Types = new[] { typeof(Document) };
+        private string ConnectionString;
 
         [TestInitialize]
         public void Init()
         {
-            var conn = TestHelper.GetString("devString");
-            
-            ModelTracker.DeleteTestTables(Types, conn);
+            ConnectionString = TestHelper.GetString("devString");
 
-            ModelTracker.Track(Types, conn);
+            ModelTracker.DeleteTestTables(Types, ConnectionString);
+
+            ModelTracker.Track(Types, ConnectionString);
 
             model = ModelTracker.GetCrudInstance();
         }
@@ -30,32 +31,54 @@ namespace Overhaul.Core.Tests
         public void CreateTest()
         {
             // Arrange
-            var doc = new Document();
+            var document = new Document();
 
             // Act
-            model.Create(doc);
+            model.Create(document);
 
             // Assert
-            Assert.IsNull(model.Read<Document>());
-        }
-
-        [TestMethod()]
-        public void DeleteTest()
-        {
-            Assert.Fail();
-        }
-
-        [TestMethod()]
-        public void ReadTest()
-        {
-            Assert.Fail();
+            Assert.IsNotNull(model.Read<Document>());
+            Assert.IsTrue(document.DocumentId > 0);
         }
 
         [TestMethod()]
         public void UpdateTest()
         {
-            Assert.Fail();
+            // Arrange
+            var document = new Document();
+
+            model.Create(document);
+
+            // Arrange
+            document.Bool = true;
+
+            // Act
+            model.Update(document);
+
+            // Assert
+            var updModel = model.Read<Document>();
+            Assert.AreEqual(true, updModel.Bool);
         }
+
+        [TestMethod()]
+        public void DeleteTest()
+        {
+            // Arrange
+            ModelTracker.DeleteTestTables(Types, ConnectionString);
+
+            ModelTracker.Track(Types, ConnectionString);
+
+            var document = new Document();
+
+            model.Create(document);
+
+            // Act
+            model.Delete(document);
+
+            // Assert
+            Assert.IsNull(model.Read<Document>());
+        }
+
 
         [Table("tblSecreteDocumentsForTest")]
         public sealed class Document
@@ -68,7 +91,7 @@ namespace Overhaul.Core.Tests
             public float Float { get; set; }
             public decimal Decimal { get; set; }
             public char Char { get; set; }
-            public double Double { get; set; }
+            public double DDouble { get; set; }
             public Guid Guid { get; set; }
             public short Short { get; set; }
             public byte Byte { get; set; }

@@ -39,7 +39,8 @@ namespace Overhaul.Core
         {
             using var conn = Create();
             var name = GetTableName(typeof(T));
-            return conn.QuerySingle<T>($"SELECT * FROM {name} LIMIT 1");
+            return conn.Query<T>($"SELECT * FROM {name}")
+                .FirstOrDefault();
         }
 
         public bool Update<T>(T entity) where T : class

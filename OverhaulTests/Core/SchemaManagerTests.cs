@@ -18,7 +18,7 @@ namespace Overhaul.Core.Tests
         private ISqlGenerator sqlGenerator;
         private ISqlModifier sqlModifier;
         private const string TableName = "mod";
-
+         
         [TestInitialize]
         public void Init()
         {

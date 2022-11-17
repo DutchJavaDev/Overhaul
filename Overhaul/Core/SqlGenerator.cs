@@ -55,8 +55,8 @@ namespace Overhaul.Core
                 var sql = $"DROP TABLE {tableName}";
                 var sqlTableDef = $"DELETE FROM {ModelTracker.GetTableName(typeof(TableDefinition))} WHERE TableName = @tableName";
 
-                Connection.ExecuteScalar(sql);
                 Connection.ExecuteScalar(sqlTableDef, new { tableName });
+                Connection.ExecuteScalar(sql);
             }
 
             return !TableExists(tableName);

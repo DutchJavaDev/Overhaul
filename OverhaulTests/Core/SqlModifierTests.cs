@@ -3,7 +3,6 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using Overhaul.Common;
-using Overhaul.Core;
 using Overhaul.Interface;
 
 using OverhaulTests;
@@ -30,7 +29,7 @@ namespace Overhaul.Core.Tests
             {
                typeof(ModifiedClass),
                typeof(ModifiedClass2)
-            },ConnectionString);
+            },ConnectionString, false);
         }
 
         [TestMethod]

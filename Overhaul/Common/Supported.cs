@@ -24,7 +24,7 @@ namespace Overhaul.Common
             {typeof(short), "SMALLINT" },
             {typeof(decimal), "DECIMAL" },
             {typeof(DateTime), "DATETIME"},
-            {typeof(char), "CHAR(2)" }
+            {typeof(char), "CHAR" }
         };
 
         private readonly static List<Type> SqlIdentityTypes = new()
