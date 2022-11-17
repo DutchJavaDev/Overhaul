@@ -1,4 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 using Overhaul.Common;
 using Overhaul.Data;
 using Overhaul.Interface;
@@ -31,7 +32,11 @@ namespace Overhaul.Core
                 || i.TableName == newType.TableName
 #endif
                 ).FirstOrDefault();
-                GetChanges(newType, oldType, out IEnumerable<string> addedColumns, out IEnumerable<string> deletedColumns);
+                GetChanges(newType, oldType, 
+                    out IEnumerable<string> addedColumns, 
+                    out IEnumerable<string> updatedColumns,
+                    out IEnumerable<string> deletedColumns);
+                updatedColumns.AsParallel().ForAll(column => sqlModifier.UpdateColumn(newType.TableName, column));
                 deletedColumns.AsParallel().ForAll(column => sqlModifier.DeleteColumn(newType.TableName, column));
                 addedColumns.AsParallel().ForAll(column => sqlModifier.AddColumn(newType.TableName, column));
             });
@@ -42,12 +47,42 @@ namespace Overhaul.Core
         }
 
         private static void GetChanges(TableDefinition table, TableDefinition oldType,
-            out IEnumerable<string> addedColumns, out IEnumerable<string> deletedColumns)
+            out IEnumerable<string> addedColumns, out IEnumerable<string> updatedColumns, 
+            out IEnumerable<string> deletedColumns)
         {
             var oldTypeColumnArray = Supported.ConvertTypesStringToArray(oldType.ColumnCollection);
             var newTypeColumnArray = Supported.ConvertTypesStringToArray(table.ColumnCollection);
             addedColumns = Supported.GetAddedColumns(oldTypeColumnArray, newTypeColumnArray);
             deletedColumns = Supported.GetDeletedColumns(oldTypeColumnArray, newTypeColumnArray);
+            updatedColumns = GetUpdatedColumns(addedColumns, deletedColumns);
+        }
+
+        private static IEnumerable<string> GetUpdatedColumns(IEnumerable<string> addedColumns, 
+            IEnumerable<string> deletedColumns)
+        {
+            // If they start the same but string length are not equal
+            var updatedColumns = addedColumns.Where(i => IsAmlostValid(deletedColumns, i));
+            addedColumns = addedColumns.Where(i => !updatedColumns.Contains(i));
+            deletedColumns = deletedColumns.Where(i => !updatedColumns.Contains(i));
+            return updatedColumns;
+        }
+
+        private static bool IsAmlostValid(IEnumerable<string> deletedColumns, string addedColumn)
+        {
+            // Regex Time
+            // @"\(.*\)"
+            const string patern = @"\(.*\)";
+
+            return deletedColumns.Any(i => 
+            {
+                var addedMatch = Regex.Match(addedColumn, patern);
+                var deletedMatch = Regex.Match(i, patern);
+
+                var addedMinus = addedColumn[..^addedMatch.Value.Length];
+                var deletedMinus = i[..^deletedMatch.Value.Length];
+
+                return addedMinus == deletedMinus;
+            });
         }
     }
 }

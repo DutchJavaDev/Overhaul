@@ -68,7 +68,7 @@ namespace Overhaul.Core.Tests
 
 
         [TestMethod]
-        public void DeleteColumnTest()
+        public void DeleteColumnTest() // Same as update except for null part :)
         {
             // Arrange
             var originDef = ModelTracker.CreateDefinitions(new[] { typeof(ModifiedClass) })

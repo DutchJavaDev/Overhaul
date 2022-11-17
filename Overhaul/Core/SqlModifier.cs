@@ -1,5 +1,6 @@
 ﻿using Dapper;
 using Overhaul.Interface;
+using System.Data.Common;
 using System.Data.SqlClient;
 
 namespace Overhaul.Core
@@ -28,6 +29,16 @@ namespace Overhaul.Core
 
             return true;
         }
+        public bool UpdateColumn(string tableName, string nColumn)
+        {
+            var sql = $"ALTER TABLE {tableName} ALTER COLUMN {nColumn}";
+
+            using (var con = Create())
+            {
+                con.ExecuteScalar(sql);
+            }
+            return true;
+        }
 
         public bool DeleteColumn(string tableName, string column)
         {
@@ -48,5 +59,6 @@ namespace Overhaul.Core
             Connection.Open();
             return Connection;
         }
+
     }
 }

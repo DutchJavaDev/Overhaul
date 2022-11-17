@@ -18,6 +18,14 @@ namespace Overhaul.Interface
         bool AddColumn(string tableName, string nColumn);
 
         /// <summary>
+        /// Updates column data type
+        /// </summary>
+        /// <param name="tableName"></param>
+        /// <param name="nColumn"></param>
+        /// <returns></returns>
+        bool UpdateColumn(string tableName, string nColumn);
+
+        /// <summary>
         /// Deletes or marks column as null able
         /// </summary>
         /// <param name="tableName"></param>
