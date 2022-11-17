@@ -14,15 +14,15 @@ namespace Overhaul.Interface
         /// </summary>
         /// <param name="tableName"></param>
         /// <param name="nColumn"></param>
-        /// <returns>true if succeded</returns>
+        /// <returns>true if succeed</returns>
         bool AddColumn(string tableName, string nColumn);
 
         /// <summary>
-        /// Deletes or marks column as nullable
+        /// Deletes or marks column as null able
         /// </summary>
         /// <param name="tableName"></param>
         /// <param name="column"></param>
-        /// <returns>true if succeded</returns>
+        /// <returns>true if succeed</returns>
         bool DeleteColumn(string tableName, string column);
     }
 }

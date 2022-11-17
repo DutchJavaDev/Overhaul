@@ -11,7 +11,7 @@ namespace Overhaul.Interface
         void RunSchemaCreate(IEnumerable<TableDefinition> addedTables);
 
         /// <summary>
-        /// Updates existins tables columns
+        /// Updates existing tables columns
         /// </summary>
         /// <param name="modifiedTables"></param>
         /// <param name="_cache"></param>

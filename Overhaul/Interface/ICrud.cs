@@ -11,7 +11,7 @@
         T Create<T>(T entity) where T : class;
 
         /// <summary>
-        /// Reads the first entity from the databatase
+        /// Reads the first entity from the database
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
