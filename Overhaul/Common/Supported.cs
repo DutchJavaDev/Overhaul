@@ -115,12 +115,6 @@ namespace Overhaul.Common
             return Attribute.IsDefined(info, attribute, true);
         }
 
-        private static Regex CreateRegex(string str)
-        { 
-            var regex = new Regex(str, RegexOptions.Compiled | RegexOptions.IgnoreCase);
-            return regex;
-        }
-
         internal static bool ValidProperty(PropertyInfo info)
         {
             var read = info.CanRead;

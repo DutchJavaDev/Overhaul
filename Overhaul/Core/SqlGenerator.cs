@@ -25,9 +25,7 @@ namespace Overhaul.Core
             // Wont work until insert is done 
             using (Connection = Create())
             { 
-                var sql = $"SELECT * FROM {ModelTracker.GetTableName(typeof(TableDefinition))}";
-        
-                return Connection.Query<TableDefinition>(sql);
+                return Connection.GetAll<TableDefinition>();
             }
         }
 
@@ -64,7 +62,7 @@ namespace Overhaul.Core
 
         public bool TableExists(string tableName)
         {
-            // Only checks for tables within this databatse [sandbox i guess]
+            // Only checks for tables within this database [sandbox i guess]
             using (Connection = Create())
             {
                 var sql = $"SELECT COUNT(*) " +

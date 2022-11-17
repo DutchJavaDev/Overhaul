@@ -10,15 +10,20 @@ namespace Overhaul.Core
 {
     internal sealed class ModelTracker : IModelTracker
     {
+        internal static ModelTrackerOptions Options;
         private string ConnectionString { get; init; }
 
         private static IEnumerable<TableDefinition> _cache;
-        private static ISqlGenerator sqlGenerator;
-        private static ISqlModifier sqlModifier;
-        private static ISchemaManager schemaManager;
+        private readonly ISqlGenerator sqlGenerator;
+        private readonly ISqlModifier sqlModifier;
+        private readonly ISchemaManager schemaManager;
 
-        public ModelTracker(string connectionString)
+        public ModelTracker(string connectionString, ModelTrackerOptions options = null)
         {
+            options ??= new ModelTrackerOptions();
+
+            Options = options;
+
             // If debug read connection string from secrets?
             sqlGenerator = new SqlGenerator(connectionString);
             sqlModifier = new SqlModifier(connectionString);
@@ -58,7 +63,7 @@ namespace Overhaul.Core
             return new Crud(_cache, ConnectionString);
         }
 
-        private static IEnumerable<TableDefinition> LoadCache()
+        private IEnumerable<TableDefinition> LoadCache()
         {
             var def = BuildDef(typeof(TableDefinition));
 
@@ -115,12 +120,7 @@ namespace Overhaul.Core
         // Only needed when debugging, running test
         public static void DeleteTestTables(Type[] tables, string conn = "", bool deleteDef = false)
         {
-
-            if (sqlGenerator == null || !string.IsNullOrEmpty(conn))
-            {
-                sqlGenerator = new SqlGenerator(conn);
-            }
-
+            var sqlGenerator = new SqlGenerator(conn);
             var del = tables.ToList();
 
             if (deleteDef)

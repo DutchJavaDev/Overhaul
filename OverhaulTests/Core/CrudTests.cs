@@ -125,6 +125,7 @@ namespace Overhaul.Core.Tests
             // Assert
             Assert.IsNotNull(collection);
             Assert.AreEqual(10, collection.Count());
+            Assert.IsTrue(collection.Count(i => i.Bool) == 10);
         }
 
         [TestMethod()]
