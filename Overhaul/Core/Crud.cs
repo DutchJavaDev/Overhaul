@@ -39,7 +39,7 @@ namespace Overhaul.Core
         {
             using var conn = Create();
             var name = GetTableName(typeof(T));
-            return conn.Query<T>($"SELECT * FROM {name}")
+            return conn.Query<T>($"SELECT TOP 1 * FROM {name}")
                 .FirstOrDefault();
         }
 

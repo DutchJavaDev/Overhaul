@@ -7,7 +7,7 @@ namespace Overhaul.Data
     {
         [Key]
         public int Id { get; set; }
-        public string TableName { get; set; } // redo table name, is causing the bug :)
+        public string TableName { get; set; } 
         public string DefType { get; set; }
         public string ColumnCollection { get; set; }
         public int ColumnCount { get; set; }
