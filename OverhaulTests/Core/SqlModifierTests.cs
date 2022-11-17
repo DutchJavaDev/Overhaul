@@ -25,6 +25,12 @@ namespace Overhaul.Core.Tests
             ConnectionString = TestHelper.GetString("devString");
 
             model = new SqlModifier(ConnectionString);
+
+            ModelTracker.DeleteTestTables(new[] 
+            {
+               typeof(ModifiedClass),
+               typeof(ModifiedClass2)
+            },ConnectionString);
         }
 
         [TestMethod]
@@ -101,18 +107,20 @@ namespace Overhaul.Core.Tests
             return new SqlGenerator(ConnectionString);
         }
 
-        [Table("mod")]
+        [Table("mold")]
         sealed class ModifiedClass
         {
-            public string Id { get; set; }
+            [Key]
+            public int Id { get; set; }
             public int Bingo { get; set; }
             public bool BitSet { get; set; }
         }
 
-        [Table("mod")]
+        [Table("mold")]
         sealed class ModifiedClass2
         {
-            public string Id { get; set; }
+            [Key]
+            public int Id { get; set; }
             public int Bingo { get; set; }
             public bool BitSet { get; set; }
             public float Cat { get; set; }

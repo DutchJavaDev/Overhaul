@@ -83,7 +83,7 @@ namespace Overhaul.Common
             var type = property.PropertyType;
             var column = SqlTypes[type];
 
-            if (IsIdentityType(type))
+            if (IsIdentityType(property))
             {
                 column += " IDENTITY(1,1) ";
             }
@@ -105,14 +105,14 @@ namespace Overhaul.Common
             return $"{name} {column}";
         }
 
-        private static bool IsIdentityType(Type type)
+        private static bool IsIdentityType(PropertyInfo type)
         {
             return IsDefined(type, typeof(KeyAttribute))
-                && SqlIdentityTypes.Contains(type);
+                && SqlIdentityTypes.Contains(type.PropertyType);
         }
         private static bool IsDefined(MemberInfo info, Type attribute)
         {
-            return Attribute.IsDefined(info, attribute);
+            return Attribute.IsDefined(info, attribute, true);
         }
 
         private static Regex CreateRegex(string str)

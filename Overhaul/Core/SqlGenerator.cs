@@ -1,6 +1,7 @@
 ﻿using System.Data.SqlClient;
 using System.Runtime.CompilerServices;
 using Dapper;
+using Dapper.Contrib.Extensions;
 using Overhaul.Data;
 using Overhaul.Interface;
 
@@ -38,6 +39,7 @@ namespace Overhaul.Core
                     $"({tableDef.ColumnCollection.Replace(";",",")})";
 
                 Connection.ExecuteScalar(sql);
+                Connection.Insert(tableDef);
             }
 
             return TableExists(tableDef.TableName);
@@ -50,28 +52,26 @@ namespace Overhaul.Core
 
             using (Connection = Create())
             {
-                tableName = ModelTracker.GetTableName(tableName);
-
                 var sql = $"DROP TABLE {tableName}";
+                var sqlTableDef = $"DELETE FROM {ModelTracker.GetTableName(typeof(TableDefinition))} WHERE TableName = @tableName";
 
                 Connection.ExecuteScalar(sql);
+                Connection.ExecuteScalar(sqlTableDef, new { tableName });
             }
 
             return !TableExists(tableName);
         }
 
-        public bool TableExists(string name)
+        public bool TableExists(string tableName)
         {
             // Only checks for tables within this databatse [sandbox i guess]
             using (Connection = Create())
             {
-                name = ModelTracker.GetTableName(name);
-
                 var sql = $"SELECT COUNT(*) " +
                           $"FROM INFORMATION_SCHEMA.TABLES " +
                           $"WHERE TABLE_NAME = @tableName;";
 
-                var parameters = new { tableName = name };
+                var parameters = new { tableName = tableName };
 
                 if (int.TryParse(Connection
                     .ExecuteScalar(sql, parameters).ToString(), 

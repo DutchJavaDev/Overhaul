@@ -30,6 +30,8 @@ namespace Overhaul.Core.Tests
             model = new SchemaManager(sqlGenerator,sqlModifier);
 
             sqlGenerator.DeleteTable(TableName);
+
+            ModelTracker.Track(Enumerable.Empty<Type>(), connection);
         }
 
         [TestMethod()]

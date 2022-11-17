@@ -10,11 +10,11 @@ namespace Overhaul.Core
 {
     internal static class ModelTracker
     {
-        private static readonly string _tablePrefix = "tbl";
         private static IEnumerable<TableDefinition> _cache;
         private static ISqlGenerator sqlGenerator;
         private static ISqlModifier sqlModifier;
         private static ISchemaManager schemaManager;
+        private static ICrud crud;
 
         public static void Track(IEnumerable<Type> types, string connectionString = "")
         {
@@ -42,6 +42,13 @@ namespace Overhaul.Core
                 schemaManager.RunSchemaUpdate(definitions.Where(i
                     => _cache.Any(ii => ii.DefType == i.DefType && !i.Equals(ii))), _cache);
             }
+
+            crud = new Crud(_cache, connectionString);
+        }
+
+        internal static ICrud GetCrudInstance()
+        {
+            return crud;
         }
 
         internal static IEnumerable<TableDefinition> LoadCache()
@@ -77,7 +84,7 @@ namespace Overhaul.Core
 
             return new TableDefinition 
             {
-                TableName = GetTableName(tableName),
+                TableName = tableName,
                 ColumnCollection = columnCollection,
                 DefType = type.Name,
                 ColumnCount = count,
@@ -91,17 +98,25 @@ namespace Overhaul.Core
                 && type.GetCustomAttribute(typeof(TableAttribute)) 
                 is TableAttribute table)
             {
-                return $"{_tablePrefix}{table.Name}";
+                return table.Name;
             }
-            return $"{_tablePrefix}{type.Name}";
+            return type.Name;
         }
 
-        public static string GetTableName(string name)
+        public static void DeleteTestTables(Type[] tables, string conn = "")
         {
-            if (!name.Contains(_tablePrefix))
-                return _tablePrefix+name;
 
-            return name;
+            if (sqlGenerator == null || !string.IsNullOrEmpty(conn))
+            {
+                sqlGenerator = new SqlGenerator(conn);
+            }
+
+            var types = tables.Select(i => BuildDef(i));
+
+            foreach (var table in types)
+            {
+                sqlGenerator.DeleteTable(table.TableName);
+            }
         }
     }
 }

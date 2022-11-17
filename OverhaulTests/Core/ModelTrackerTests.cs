@@ -1,24 +1,33 @@
 ﻿using Dapper.Contrib.Extensions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-
+using OverhaulTests;
 
 namespace Overhaul.Core.Tests
 {
     [TestClass()]
     public class ModelTrackerTests
     {
-        [TestMethod()]
-        public void TrackTest()
-        {
-            Assert.IsTrue(true);
-        }
+        // This is a feature
+        //[TestMethod()]
+        //public void TrackTest()
+        //{
+        //    // Arrange
+        //    var types = new[]
+        //    {
+        //        typeof(NoTableAttributeClass),
+        //        typeof(TableAttributeClass)
+        //    };
+
+        //    // Act
+        //    ModelTracker.Track(types, TestHelper.GetString("devString"));
+        //}
 
         [TestMethod]
         public void CreateDefenitionsTest()
         {
             // Arrange
-            var types = new[] 
-            { 
+            var types = new[]
+            {
                 typeof(NoTableAttributeClass),
                 typeof(TableAttributeClass)
             };
@@ -32,8 +41,8 @@ namespace Overhaul.Core.Tests
             var attr = definitons.Where(i => i.DefType.Equals(types[1].Name))
                 .First();
 
-            Assert.AreEqual(noAttr.TableName, "tblNoTableAttributeClass");
-            Assert.AreEqual(attr.TableName, "tblcustomName");
+            Assert.AreEqual(noAttr.TableName, "NoTableAttributeClass");
+            Assert.AreEqual(attr.TableName, "customName");
 
             Assert.AreEqual(noAttr.ColumnCollection, string.Empty);
             Assert.AreEqual(attr.ColumnCollection, string.Empty);
@@ -52,7 +61,7 @@ namespace Overhaul.Core.Tests
             var tableName = ModelTracker.GetTableName(_type);
 
             // Assert
-            Assert.AreEqual("tblcustomName",tableName);
+            Assert.AreEqual("customName", tableName);
         }
 
         [TestMethod]
@@ -65,7 +74,16 @@ namespace Overhaul.Core.Tests
             var tableName = ModelTracker.GetTableName(_type);
 
             // Assert
-            Assert.AreEqual("tblNoTableAttributeClass", tableName);
+            Assert.AreEqual("NoTableAttributeClass", tableName);
+        }
+
+        [TestCleanup]
+        public void CleanUp()
+        {
+            ModelTracker.DeleteTestTables(new[] { 
+                typeof(NoTableAttributeClass),
+                typeof(TableAttributeClass),
+            }, TestHelper.GetString("devString"));
         }
 
         private sealed class NoTableAttributeClass 
