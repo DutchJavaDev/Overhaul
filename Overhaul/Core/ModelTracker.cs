@@ -8,15 +8,17 @@ using Overhaul.Interface;
 [assembly: InternalsVisibleTo("OverhaulTests")]
 namespace Overhaul.Core
 {
-    internal static class ModelTracker
+    internal sealed class ModelTracker : IModelTracker
     {
+        private string ConnectionString { get; init; }
+
         private static IEnumerable<TableDefinition> _cache;
         private static ISqlGenerator sqlGenerator;
         private static ISqlModifier sqlModifier;
         private static ISchemaManager schemaManager;
         private static ICrud crud;
 
-        public static void Track(IEnumerable<Type> types, string connectionString = "")
+        public ModelTracker(string connectionString)
         {
             // If debug read connection string from secrets?
             sqlGenerator = new SqlGenerator(connectionString);
@@ -24,9 +26,14 @@ namespace Overhaul.Core
 
             // Check Db
             _cache = LoadCache();
-
-            schemaManager = new SchemaManager(sqlGenerator,sqlModifier);
             
+            schemaManager = new SchemaManager(sqlGenerator,sqlModifier);
+
+            ConnectionString = connectionString;
+        }
+
+        public void Track(IEnumerable<Type> types)
+        {
             // Create definitions
             var definitions = CreateDefinitions(types);
             
@@ -46,11 +53,13 @@ namespace Overhaul.Core
                 _cache = LoadCache();
             }
 
-            crud = new Crud(_cache, connectionString);
+            crud = new Crud(_cache, ConnectionString);
         }
 
-        internal static ICrud GetCrudInstance() 
-            => crud;
+        public ICrud GetCrudInstance()
+        {
+            return crud;
+        }
 
         internal static IEnumerable<TableDefinition> LoadCache()
         {
@@ -105,6 +114,8 @@ namespace Overhaul.Core
             return type.Name;
         }
 
+#if DEBUG 
+        // Only needed when debugging, running test
         public static void DeleteTestTables(Type[] tables, string conn = "", bool deleteDef = false)
         {
 
@@ -128,5 +139,6 @@ namespace Overhaul.Core
                 sqlGenerator.DeleteTable(table.TableName);
             }
         }
+#endif
     }
 }

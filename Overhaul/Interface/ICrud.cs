@@ -1,6 +1,6 @@
 ﻿namespace Overhaul.Interface
 {
-    internal interface ICrud
+    public interface ICrud
     {
         /// <summary>
         /// Creates a new entity in the database

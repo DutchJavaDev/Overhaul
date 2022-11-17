@@ -1,6 +1,5 @@
 ﻿using Dapper.Contrib.Extensions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Overhaul.Common;
 using Overhaul.Data;
 using Overhaul.Data.Attributes;
 using Overhaul.Interface;
@@ -31,7 +30,9 @@ namespace Overhaul.Core.Tests
 
             sqlGenerator.DeleteTable(TableName);
 
-            ModelTracker.Track(Enumerable.Empty<Type>(), connection);
+            IModelTracker tracker = new ModelTracker(connection);
+
+            tracker.Track(Enumerable.Empty<Type>());
         }
 
         [TestMethod()]

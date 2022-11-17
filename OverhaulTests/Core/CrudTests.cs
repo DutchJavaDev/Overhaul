@@ -19,18 +19,13 @@ namespace Overhaul.Core.Tests
         public void Init()
         {
             ConnectionString = TestHelper.GetString("devString");
-
-            ModelTracker.DeleteTestTables(Types, ConnectionString);
-
-            ModelTracker.Track(Types, ConnectionString);
-
-            model = ModelTracker.GetCrudInstance();
         }
 
         [TestMethod()]
         public void CreateTest()
         {
             // Arrange
+            model = CreateCrudInstance();
             var document = new Document();
 
             // Act
@@ -45,6 +40,7 @@ namespace Overhaul.Core.Tests
         public void UpdateTest()
         {
             // Arrange
+            model = CreateCrudInstance();
             var document = new Document();
 
             model.Create(document);
@@ -64,10 +60,7 @@ namespace Overhaul.Core.Tests
         public void DeleteTest()
         {
             // Arrange
-            ModelTracker.DeleteTestTables(Types, ConnectionString);
-
-            ModelTracker.Track(Types, ConnectionString);
-
+            model = CreateCrudInstance();
             var document = new Document();
 
             model.Create(document);
@@ -77,6 +70,21 @@ namespace Overhaul.Core.Tests
 
             // Assert
             Assert.IsNull(model.Read<Document>());
+        }
+
+        public IModelTracker CreateModelTracker()
+        {
+            ModelTracker.DeleteTestTables(Types, ConnectionString);
+
+            IModelTracker tracker = new ModelTracker(ConnectionString);
+            tracker.Track(Types);
+            return tracker;
+        }
+
+        public ICrud CreateCrudInstance()
+        {
+            return CreateModelTracker()
+                .GetCrudInstance();
         }
 
 
