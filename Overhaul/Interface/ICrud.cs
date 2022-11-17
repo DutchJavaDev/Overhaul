@@ -24,7 +24,10 @@
         /// <param name="entity"></param>
         /// <returns></returns>
         bool Update<T>(T entity) where T : class;
-
+        T GetById<T>(object id) where T : class;
+        T GetBy<T>(string columnName, object value) where T : class;
+        IEnumerable<T> GetCollection<T>() where T : class;
+        IEnumerable<T> GetCollectionWhere<T>(string columnName, object value) where T : class;
         /// <summary>
         /// Delete an existing entity
         /// </summary>

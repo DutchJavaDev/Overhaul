@@ -36,6 +36,93 @@ namespace Overhaul.Core.Tests
             Assert.IsTrue(document.DocumentId > 0);
         }
 
+        [TestMethod]
+        public void GetByIdTest()
+        {
+            // Arrange
+            model = CreateCrudInstance();
+
+            Enumerable.Range(0, 10)
+                .Select(i => new Document())
+                .AsParallel().ForAll(d => model.Create(d));
+
+            // Act
+            var doc = model.GetById<Document>(5);
+
+            // Assert
+            Assert.AreEqual(5, doc.DocumentId);
+        }
+
+        [TestMethod]
+        public void GetByTest()
+        {
+            // Arrange
+            model = CreateCrudInstance();
+
+            Enumerable.Range(0, 10)
+                .Select((d,index) => new Document
+                {
+                    String = $"document{index}",
+                })
+                .AsParallel()
+                .ForAll(d => model.Create(d));
+
+            // Act
+            var document = model.GetBy<Document>(nameof(Document.String), "document5");
+
+            // Assert
+            Assert.IsNotNull(document);
+            Assert.AreEqual("document5", document.String);
+        }
+
+        [TestMethod]
+        public void GetCollectionTest()
+        {
+            // Arrange
+            model = CreateCrudInstance();
+
+            Enumerable.Range(0, 50)
+                .Select(i => new Document())
+                .AsParallel().ForAll(d => model.Create(d));
+
+            // Act
+            var collection = model.GetCollection<Document>();
+
+            // Assert
+            Assert.IsNotNull(collection);
+            Assert.AreEqual(50, collection.Count());
+        }
+
+        [TestMethod]
+        public void GetCollectionWhereTest()
+        {
+            // Arrange
+            model = CreateCrudInstance();
+
+            Enumerable.Range(0, 10)
+                .Select(i => new Document())
+                .AsParallel().ForAll(d => model.Create(d));
+            Enumerable.Range(0, 10)
+                .Select(i => new Document 
+                {
+                    String = "Hello World"
+                })
+                .AsParallel().ForAll(d => model.Create(d));
+            Enumerable.Range(0, 10)
+                .Select(i => new Document 
+                {
+                    Bool = true
+                })
+                .AsParallel().ForAll(d => model.Create(d));
+
+            // Act
+            var collection = model.GetCollectionWhere<Document>(nameof(Document.Bool), true);
+
+            // Assert
+            Assert.IsNotNull(collection);
+            Assert.AreEqual(10, collection.Count());
+        }
+
         [TestMethod()]
         public void UpdateTest()
         {
@@ -86,7 +173,6 @@ namespace Overhaul.Core.Tests
             return CreateModelTracker()
                 .GetCrudInstance();
         }
-
 
         [Table("tblSecreteDocumentsForTest")]
         public sealed class Document

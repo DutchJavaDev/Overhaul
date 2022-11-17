@@ -16,7 +16,6 @@ namespace Overhaul.Core
         private static ISqlGenerator sqlGenerator;
         private static ISqlModifier sqlModifier;
         private static ISchemaManager schemaManager;
-        private static ICrud crud;
 
         public ModelTracker(string connectionString)
         {
@@ -52,16 +51,14 @@ namespace Overhaul.Core
                 // Check Db for changes
                 _cache = LoadCache();
             }
-
-            crud = new Crud(_cache, ConnectionString);
         }
 
         public ICrud GetCrudInstance()
         {
-            return crud;
+            return new Crud(_cache, ConnectionString);
         }
 
-        internal static IEnumerable<TableDefinition> LoadCache()
+        private static IEnumerable<TableDefinition> LoadCache()
         {
             var def = BuildDef(typeof(TableDefinition));
 
