@@ -18,7 +18,7 @@ namespace Overhaul.Core
 
         public static void Track(IEnumerable<Type> types, string connectionString = "")
         {
-            // If debug read connectionstring from secrets?
+            // If debug read connection string from secrets?
             sqlGenerator = new SqlGenerator(connectionString);
             sqlModifier = new SqlModifier(connectionString);
 
@@ -38,18 +38,19 @@ namespace Overhaul.Core
                 !_cache.Any(ii => ii.DefType == i.DefType)));
 
                 // DefType are the same but columns don't match up
-                // ovvriden queals for tableDef
+                // overridden equals for tableDef
                 schemaManager.RunSchemaUpdate(definitions.Where(i
                     => _cache.Any(ii => ii.DefType == i.DefType && !i.Equals(ii))), _cache);
+
+                // Check Db for changes
+                _cache = LoadCache();
             }
 
             crud = new Crud(_cache, connectionString);
         }
 
-        internal static ICrud GetCrudInstance()
-        {
-            return crud;
-        }
+        internal static ICrud GetCrudInstance() 
+            => crud;
 
         internal static IEnumerable<TableDefinition> LoadCache()
         {
@@ -65,7 +66,7 @@ namespace Overhaul.Core
             }
 
             return sqlGenerator.GetCollection()
-                .Where(i => i.Id > 1); // Skipping Tabledef, will get deleted since its not part of the 'new' types
+                .Where(i => i.Id > 1); // Skipping Table def, will get deleted since its not part of the 'new' types
         }
 
         // Move to class
@@ -83,7 +84,7 @@ namespace Overhaul.Core
             var columnCollection = 
                 Supported.ConvertPropertiesToTypesString(properties, out var count);
 
-            return new TableDefinition 
+            return new() 
             {
                 TableName = tableName,
                 ColumnCollection = columnCollection,
