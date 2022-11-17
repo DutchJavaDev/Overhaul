@@ -63,16 +63,20 @@ namespace Overhaul.Core.Tests
                 .Select((d,index) => new Document
                 {
                     String = $"document{index}",
+                    Int = index
                 })
                 .AsParallel()
                 .ForAll(d => model.Create(d));
 
             // Act
             var document = model.GetBy<Document>(nameof(Document.String), "document5");
+            var doc2 = model.GetBy<Document>(nameof(Document.Int), 9);
 
             // Assert
             Assert.IsNotNull(document);
+            Assert.IsNotNull(doc2);
             Assert.AreEqual("document5", document.String);
+            Assert.AreEqual(9, doc2.Int);
         }
 
         [TestMethod]
