@@ -3,6 +3,5 @@
     public sealed class ModelTrackerOptions
     {
         public bool DataLose { get; set; }
-        public string TablePrefix { get; set; }
     }
 }

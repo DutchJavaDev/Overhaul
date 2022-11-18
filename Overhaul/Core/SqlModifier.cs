@@ -1,6 +1,5 @@
 ﻿using Dapper;
 using Overhaul.Interface;
-using System.Data.Common;
 using System.Data.SqlClient;
 
 namespace Overhaul.Core
@@ -42,14 +41,20 @@ namespace Overhaul.Core
 
         public bool DeleteColumn(string tableName, string column)
         {
-            // Data loss protection for now, see what happens 
-            var sql = $"ALTER TABLE {tableName} ALTER COLUMN {column}" +
+            var sql = $"ALTER TABLE {tableName} ";
+
+            if (ModelTracker.Options.DataLose)
+            {
+                sql += $"DROP DOLUMN {column}";
+            }
+            else
+            {
+                sql += $"ALTER COLUMN {column}" +
                 $"{(column.Contains("NULL") ? "" : " NULL")}";
+            }
 
             using (var con = Create())
-            {
-                con.ExecuteScalar(sql);
-            }
+            con.ExecuteScalar(sql);
             return true;
         }
 

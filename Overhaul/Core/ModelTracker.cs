@@ -8,7 +8,7 @@ using Overhaul.Interface;
 [assembly: InternalsVisibleTo("OverhaulTests")]
 namespace Overhaul.Core
 {
-    internal sealed class ModelTracker : IModelTracker
+    public sealed class ModelTracker : IModelTracker
     {
         internal static ModelTrackerOptions Options;
         private string ConnectionString { get; init; }
