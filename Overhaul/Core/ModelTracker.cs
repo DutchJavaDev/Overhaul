@@ -43,8 +43,6 @@ namespace Overhaul.Core
             
             if (definitions.Any() || _cache.Any())
             {
-                schemaManager.RunSchemaDelete(_cache.Where(i => !definitions.Any(ii => i == ii)));
-
                 schemaManager.RunSchemaCreate(definitions.Where(i => 
                 !_cache.Any(ii => ii.DefType == i.DefType)));
 
@@ -52,9 +50,8 @@ namespace Overhaul.Core
                 // overridden equals for tableDef
                 schemaManager.RunSchemaUpdate(definitions.Where(i
                     => _cache.Any(ii => ii.DefType == i.DefType && !i.Equals(ii))), _cache);
-
-                // Check Db for changes
-                _cache = LoadCache();
+                
+                schemaManager.RunSchemaDelete(_cache.Where(i => !definitions.Any(ii => i.Equals(ii))));
             }
         }
 
