@@ -1,5 +1,4 @@
-﻿using System.Linq.Expressions;
-using Dapper.Contrib.Extensions;
+﻿using Dapper.Contrib.Extensions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Overhaul.Interface;
 using OverhaulTests;
@@ -150,6 +149,28 @@ namespace Overhaul.Core.Tests
             Assert.IsNotNull(collection);
             Assert.AreEqual(50, collection.Count());
         }
+        [TestMethod]
+        public void GetCollectionColumnTest()
+        {
+            // Arrange
+            model = CreateCrudInstance();
+            const string str = "this is a string";
+
+            Enumerable.Range(0, 50)
+                .Select(i => new Document 
+                {
+                    String = str
+                })
+                .AsParallel().ForAll(d => model.Create(d));
+
+            // Act
+            var collection = model.GetCollection<Document>(nameof(Document.String));
+
+            // Assert
+            Assert.IsNotNull(collection);
+            Assert.AreEqual(50, collection.Count());
+            Assert.AreEqual(50, collection.Count(i => i.String.Length == str.Length));
+        }
 
         [TestMethod]
         public void GetCollectionWhereTest()
@@ -180,6 +201,42 @@ namespace Overhaul.Core.Tests
             Assert.IsNotNull(collection);
             Assert.AreEqual(10, collection.Count());
             Assert.IsTrue(collection.Count(i => i.Bool) == 10);
+        }
+        [TestMethod]
+        public void GetCollectionWhereColumnTest()
+        {
+            // Arrange
+            model = CreateCrudInstance();
+            var str = "Yep not Hello world";
+
+            Enumerable.Range(0, 10)
+                .Select(i => new Document())
+                .AsParallel().ForAll(d => model.Create(d));
+            Enumerable.Range(0, 10)
+                .Select(i => new Document
+                {
+                    String = "Hello World"
+                })
+                .AsParallel().ForAll(d => model.Create(d));
+            Enumerable.Range(0, 10)
+                .Select(i => new Document
+                {
+                    Bool = true,
+                    String = str,
+                    Int = 17
+                })
+                .AsParallel().ForAll(d => model.Create(d));
+
+            // Act
+            var collection = model.GetCollectionWhere<Document>(nameof(Document.Bool), 
+                true, nameof(Document.String), nameof(Document.Bool));
+
+            // Assert
+            Assert.IsNotNull(collection);
+            Assert.AreEqual(10, collection.Count());
+            Assert.IsTrue(collection.Count(i => i.Bool) == 10);
+            Assert.IsTrue(collection.Count(i => i.Int == 0) == 10);
+            Assert.IsTrue(collection.Count(i => i.String == str) == 10);
         }
 
         [TestMethod()]
@@ -218,7 +275,7 @@ namespace Overhaul.Core.Tests
             Assert.IsNull(model.Read<Document>());
         }
 
-        public IModelTracker CreateModelTracker()
+        private IModelTracker CreateModelTracker()
         {
             ModelTracker.DeleteTestTables(Types, ConnectionString);
 
@@ -227,7 +284,7 @@ namespace Overhaul.Core.Tests
             return tracker;
         }
 
-        public ICrud CreateCrudInstance()
+        private ICrud CreateCrudInstance()
         {
             return CreateModelTracker()
                 .GetCrudInstance();

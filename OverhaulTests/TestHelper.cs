@@ -13,7 +13,13 @@ namespace OverhaulTests
                 return _cache[section];
             }
 
-            var environment = Environment.GetEnvironmentVariable("NETCORE_ENVIRONMENT");
+            var environment = Environment.GetEnvironmentVariables();
+
+            if (environment.Contains(section.ToUpper()))
+            {
+                return environment[section.ToUpper()] as string;
+            }
+
             // Could put path i enviroment variables
             // Researc
             var builder = new ConfigurationBuilder()
