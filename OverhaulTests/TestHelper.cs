@@ -6,7 +6,7 @@ namespace OverhaulTests
     {
         private readonly static Dictionary<string, string> _cache = new();
 
-        public static string GetString(string section)
+        public static string? GetString(string section)
         {
             if(_cache.ContainsKey(section))
             {
@@ -17,7 +17,8 @@ namespace OverhaulTests
 
             if (environment.Contains(section.ToUpper()))
             {
-                return environment[section.ToUpper()] as string;
+                _cache.Add(section, (string)environment[section.ToUpper()]);
+                return _cache[section];
             }
 
             // Could put path i enviroment variables
