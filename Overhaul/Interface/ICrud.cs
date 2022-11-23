@@ -15,7 +15,7 @@
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        T Read<T>() where T : class;
+        T Read<T>(params string[] columns) where T : class;
 
         /// <summary>
         /// Updates an existing entity
@@ -30,7 +30,7 @@
         /// <typeparam name="T"></typeparam>
         /// <param name="id"></param>
         /// <returns></returns>
-        T GetById<T>(object id) where T : class;
+        T GetById<T>(object id, params string[] columns) where T : class;
         /// <summary>
         /// Gets an entity by a specific column field
         /// </summary>
@@ -38,13 +38,13 @@
         /// <param name="columnName"></param>
         /// <param name="value"></param>
         /// <returns></returns>
-        T GetBy<T>(string columnName, object value) where T : class;
+        T GetBy<T>(string columnName, object value, params string[] columns) where T : class;
         /// <summary>
         /// Gets a collection of entity's
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        IEnumerable<T> GetCollection<T>() where T : class;
+        IEnumerable<T> GetCollection<T>(params string[] columns) where T : class;
         /// <summary>
         /// Gets s collection of entity's based of a column value 
         /// </summary>
@@ -52,7 +52,7 @@
         /// <param name="columnName"></param>
         /// <param name="value"></param>
         /// <returns></returns>
-        IEnumerable<T> GetCollectionWhere<T>(string columnName, object value) where T : class;
+        IEnumerable<T> GetCollectionWhere<T>(string columnName, object value, params string[] columns) where T : class;
         /// <summary>
         /// Delete an existing entity
         /// </summary>

@@ -27,32 +27,79 @@ namespace Overhaul.Core
             conn.Insert(entity);
             return entity;
         }
-        public T GetById<T>(object id) where T : class
+        public T GetById<T>(object id, params string[] columns) 
+            where T : class
         {
-            using var conn = Create();
-            return conn.Get<T>(id);
+            SqlConnection conn;
+
+            // Only works if entity has key attribute
+            if (columns.Any())
+            {
+                var keyId = typeof(T).GetProperties().
+                First(i => i.CustomAttributes.Any(a => a.AttributeType == 
+                typeof(KeyAttribute)));
+
+                if(keyId == null)
+                {
+                    throw new Exception($"{nameof(keyId)} is null");
+                }
+
+                var columnSql = columns.Any() ? Fix<T>(columns) : "*";
+
+                var sql = $"SELECT {columnSql},{keyId.Name} FROM " +
+                          $"{GetTableName(typeof(T))} " +
+                          $"WHERE {keyId.Name} = {id}";
+
+                using (conn = Create()) 
+                {    
+                   return conn.QuerySingle<T>(sql);
+                }
+            }
+
+            using (conn = Create())
+            {
+                return conn.Get<T>(id);
+            }
         }
-        public T GetBy<T>(string columnName, object value) where T : class
+        public T GetBy<T>(string columnName, object value, params string[] columns) 
+            where T : class
         {
-            string sql = $"SELECT TOP 1 * FROM {GetTableName(typeof(T))} " +
+            // Potential bug, column query is searching for wont be included in final result
+            var columnSql = columns.Any() ? Fix<T>(columns) : "*";
+            string sql = $"SELECT TOP 1 {columnSql} FROM {GetTableName(typeof(T))} " +
                 $"WHERE {columnName} = '{value}'";
             using var conn = Create();
             return conn.QuerySingle<T>(sql);
         }
-        public T Read<T>() where T : class
+        public T Read<T>(params string[] columns) where T : class
         {
+            // Potential bug, column query is searching for wont be included in final result
+            var columnSql = columns.Any() ? Fix<T>(columns) : "*";
             var name = GetTableName(typeof(T));
             using var conn = Create();
-            return conn.QueryFirstOrDefault<T>($"SELECT TOP 1 * FROM {name}");
+            return conn.QueryFirstOrDefault<T>($"SELECT TOP 1 {columnSql} FROM {name}");
         }
-        public IEnumerable<T> GetCollection<T>() where T : class
+        public IEnumerable<T> GetCollection<T>(params string[] columns) where T : class
         {
-            using var conn = Create();
-            return conn.GetAll<T>();
+            if(columns.Any())
+            {
+                var columnSql = Fix<T>(columns);
+                var name = GetTableName(typeof(T));
+                var sql = $"SELECT {columnSql} FROM {name}";
+                using var conn = Create();
+                return conn.Query<T>(sql);
+            }
+            else
+            {
+                using var conn = Create();
+                return conn.GetAll<T>();
+            }
         }
-        public IEnumerable<T> GetCollectionWhere<T>(string columnName, object value) where T : class 
+        public IEnumerable<T> GetCollectionWhere<T>(string columnName, object value,
+            params string[] columns) where T : class 
         {
-            string sql = $"SELECT * FROM {GetTableName(typeof(T))} " +
+            var columnSql = columns.Any() ? Fix<T>(columns) : "*";
+            string sql = $"SELECT {columnSql} FROM {GetTableName(typeof(T))} " +
                 $"WHERE {columnName} = '{value}'";
             using var conn = Create();
             return conn.Query<T>(sql);
@@ -84,6 +131,19 @@ namespace Overhaul.Core
             }
 
             return ModelTracker.GetTableName(t);
+        }
+
+        private static string Fix<T>(string[] str)
+        {
+            // Include entity id when user specifies columns
+            // If it has one of course 
+            var keyId = typeof(T).GetProperties().
+                Where(i => i.CustomAttributes.Any(a => a.AttributeType == typeof(KeyAttribute)));
+
+            if (str.Length == 0) return string.Empty;
+            // All but the last one
+            var defaultColumns = string.Join(",", str);
+            return $"{(keyId.Any() ? $"{keyId.First().Name}," : "")}{defaultColumns}";
         }
     }
 }

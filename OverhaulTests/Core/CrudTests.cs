@@ -1,4 +1,5 @@
-﻿using Dapper.Contrib.Extensions;
+﻿using System.Linq.Expressions;
+using Dapper.Contrib.Extensions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Overhaul.Interface;
 using OverhaulTests;
@@ -52,6 +53,31 @@ namespace Overhaul.Core.Tests
             // Assert
             Assert.AreEqual(5, doc.DocumentId);
         }
+        [TestMethod]
+        public void GetByIdColumnsTest()
+        {
+            // Arrange
+            model = CreateCrudInstance();
+            var guid = Guid.NewGuid();
+
+            Enumerable.Range(0, 10)
+                .Select(i => new Document 
+                {
+                    Bool = true,
+                    Guid = guid
+                })
+                .AsParallel().ForAll(d => model.Create(d));
+
+            // Act
+            var doc = model.GetById<Document>(5,
+                nameof(Document.Bool),
+                nameof(Document.Guid));
+
+            // Assert
+            Assert.AreEqual(5, doc.DocumentId);
+            Assert.AreEqual(true, doc.Bool);
+            Assert.AreEqual(guid, doc.Guid);
+        }
 
         [TestMethod]
         public void GetByTest()
@@ -71,6 +97,34 @@ namespace Overhaul.Core.Tests
             // Act
             var document = model.GetBy<Document>(nameof(Document.String), "document5");
             var doc2 = model.GetBy<Document>(nameof(Document.Int), 9);
+
+            // Assert
+            Assert.IsNotNull(document);
+            Assert.IsNotNull(doc2);
+            Assert.AreEqual("document5", document.String);
+            Assert.AreEqual(9, doc2.Int);
+        }
+        [TestMethod]
+        public void GetByColumnTest()
+        {
+            // Arrange
+            model = CreateCrudInstance();
+
+            Enumerable.Range(0, 10)
+                .Select((d, index) => new Document
+                {
+                    String = $"document{index}",
+                    Int = index,
+                })
+                .AsParallel()
+                .ForAll(d => model.Create(d));
+
+            // Act
+            var document = model.GetBy<Document>(nameof(Document.String),
+                "document5", nameof(Document.String));
+
+            var doc2 = model.GetBy<Document>(nameof(Document.Int), 
+                9, nameof(Document.Int));
 
             // Assert
             Assert.IsNotNull(document);
