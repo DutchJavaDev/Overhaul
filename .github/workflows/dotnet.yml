@@ -26,5 +26,6 @@ jobs:
       run: dotnet build --no-restore
     - name: Test
       env:
-        secrete: lol
+        secrete: ${{ secrets.SECRETE }}
+        devString: ${{ secrets.DEVSTRING }}
       run: dotnet test --no-build --verbosity normal
