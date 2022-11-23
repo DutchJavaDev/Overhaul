@@ -13,7 +13,7 @@ namespace OverhaulTests
                 return _cache[section];
             }
 
-            var environment = Environment.GetEnvironmentVariables();
+            var environment = Environment.GetEnvironmentVariables(EnvironmentVariableTarget.Machine);
 
             if (environment.Contains(section.ToUpper()))
             {
@@ -22,7 +22,7 @@ namespace OverhaulTests
 
             // Could put path i enviroment variables
             // Researc
-            var builder = new ConfigurationBuilder()
+             var builder = new ConfigurationBuilder()
                 .AddUserSecrets(typeof(TestHelper).Assembly)
                 .AddEnvironmentVariables();
 
