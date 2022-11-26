@@ -41,8 +41,8 @@ namespace Overhaul.Common
 
         public static string ConvertPropertiesToTypesString(PropertyInfo[] types, out int count)
         {
-            var validColumns = types.Where(i => SqlTypes.ContainsKey(i.PropertyType))
-                .Select(i => GetColumnDefinition(i));
+
+            var validColumns = types.Select(i => GetColumnDefinition(i));
 
             var builder = new StringBuilder();
 
@@ -79,8 +79,20 @@ namespace Overhaul.Common
 
         private static string GetColumnDefinition(PropertyInfo property)
         {
+            Type _type;
+
+            if (property.PropertyType.IsGenericType
+                && property.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
+            {
+                _type = Nullable.GetUnderlyingType(property.PropertyType);
+            }
+            else
+            {
+                _type = property.PropertyType;
+            }
+
             var name = property.Name;
-            var type = property.PropertyType;
+            var type = _type;
             var column = SqlTypes[type];
 
             if (IsIdentityType(property))
@@ -119,7 +131,7 @@ namespace Overhaul.Common
         {
             var read = info.CanRead;
             var write = info.CanWrite;
-            // var primitieve = info.DeclaringType.IsPrimitive; does not support datetime && guid
+            //var primitieve = info.DeclaringType.IsPrimitive; does not support datetime && guid
             var publicSet = info.GetSetMethod(false)?.IsPublic;
             var publicGet = info.GetGetMethod(false)?.IsPublic;
 

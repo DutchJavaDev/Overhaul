@@ -123,7 +123,7 @@ namespace Overhaul.Common.Tests
             public string String { get; set; } = string.Empty;
             public float Float { get; set; }
             public decimal Decimal { get; set; }
-            public char Char { get; set; }
+            public char? Char { get; set; }
             public double Double { get; set; }
             public Guid Guid { get; set; }
             public short Short { get; set; }

@@ -298,12 +298,12 @@ namespace Overhaul.Core.Tests
             public int DocumentNumber { get; set; }
             public int Int { get; set; }
             public string String { get; set; } = string.Empty;
-            public float Float { get; set; }
+            public float? Float { get; set; }
             public decimal Decimal { get; set; }
             public char Char { get; set; }
             public double DDouble { get; set; }
             public Guid Guid { get; set; }
-            public short Short { get; set; }
+            public short? Short { get; set; }
             public byte Byte { get; set; }
             public bool Bool { get; set; }
             public DateTime DateTime { get; set; } = DateTime.Now;
