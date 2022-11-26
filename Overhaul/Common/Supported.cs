@@ -41,8 +41,9 @@ namespace Overhaul.Common
 
         public static string ConvertPropertiesToTypesString(PropertyInfo[] types, out int count)
         {
-
-            var validColumns = types.Select(i => GetColumnDefinition(i));
+            var validColumns = types.Where(i => !i.CustomAttributes
+                .Any(i => i.GetType() == typeof(ComputedAttribute)))
+                .Select(i => GetColumnDefinition(i));
 
             var builder = new StringBuilder();
 
@@ -129,6 +130,11 @@ namespace Overhaul.Common
 
         internal static bool ValidProperty(PropertyInfo info)
         {
+            if(info.CustomAttributes.Any(i => typeof(ComputedAttribute) == i.AttributeType))
+            {
+                return false;
+            }
+
             var read = info.CanRead;
             var write = info.CanWrite;
             //var primitieve = info.DeclaringType.IsPrimitive; does not support datetime && guid

@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Dapper.Contrib.Extensions;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Overhaul.Common.Tests
 {
@@ -11,7 +12,8 @@ namespace Overhaul.Common.Tests
         public void ValidProperyTest()
         {
             // Arrange
-            var properties = _type.GetProperties();
+            var properties = _type.GetProperties()
+                .Where(i => !i.CustomAttributes.Any(i => i.AttributeType == typeof(ComputedAttribute)));
 
             // Assert
             foreach (var prop in properties)
@@ -130,6 +132,9 @@ namespace Overhaul.Common.Tests
             public byte Byte { get; set;  }
             public bool Bool { get; set; }
             public DateTime DateTime { get; set; }
+
+            [Computed]
+            public int Bingo { get; set; }
         }
     }
 }
