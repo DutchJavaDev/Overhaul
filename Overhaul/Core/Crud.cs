@@ -44,15 +44,19 @@ namespace Overhaul.Core
                     throw new Exception($"{nameof(keyId)} is null");
                 }
 
-                var columnSql = columns.Any() ? Fix<T>(columns) : "*";
+                var columnSql = columns.Any() ? ResolveColumns<T>(columns) : "*";
 
                 var sql = $"SELECT {columnSql},{keyId.Name} FROM " +
                           $"{GetTableName(typeof(T))} " +
-                          $"WHERE {keyId.Name} = {id}";
+                          $"WHERE {keyId.Name} = @id";
+                var parameters = new 
+                {
+                    id
+                };
 
                 using (conn = Create()) 
                 {    
-                   return conn.QuerySingle<T>(sql);
+                   return conn.QuerySingle<T>(sql,parameters);
                 }
             }
 
@@ -65,16 +69,20 @@ namespace Overhaul.Core
             where T : class
         {
             // Potential bug, column query is searching for wont be included in final result
-            var columnSql = columns.Any() ? Fix<T>(columns) : "*";
+            var columnSql = columns.Any() ? ResolveColumns<T>(columns) : "*";
             string sql = $"SELECT TOP 1 {columnSql} FROM {GetTableName(typeof(T))} " +
-                $"WHERE {columnName} = '{value}'";
+                $"WHERE {columnName} = @value";
+            var parameters = new 
+            {
+                value
+            };
             using var conn = Create();
-            return conn.QuerySingle<T>(sql);
+            return conn.QuerySingle<T>(sql,parameters);
         }
         public T Read<T>(params string[] columns) where T : class
         {
             // Potential bug, column query is searching for wont be included in final result
-            var columnSql = columns.Any() ? Fix<T>(columns) : "*";
+            var columnSql = columns.Any() ? ResolveColumns<T>(columns) : "*";
             var name = GetTableName(typeof(T));
             using var conn = Create();
             return conn.QueryFirstOrDefault<T>($"SELECT TOP 1 {columnSql} FROM {name}");
@@ -83,7 +91,7 @@ namespace Overhaul.Core
         {
             if(columns.Any())
             {
-                var columnSql = Fix<T>(columns);
+                var columnSql = ResolveColumns<T>(columns);
                 var name = GetTableName(typeof(T));
                 var sql = $"SELECT {columnSql} FROM {name}";
                 using var conn = Create();
@@ -98,11 +106,15 @@ namespace Overhaul.Core
         public IEnumerable<T> GetCollectionWhere<T>(string columnName, object value,
             params string[] columns) where T : class 
         {
-            var columnSql = columns.Any() ? Fix<T>(columns) : "*";
+            var columnSql = columns.Any() ? ResolveColumns<T>(columns) : "*";
             string sql = $"SELECT {columnSql} FROM {GetTableName(typeof(T))} " +
-                $"WHERE {columnName} = '{value}'";
+                $"WHERE {columnName} = @value";
+            var parameters = new 
+            {
+                value
+            };
             using var conn = Create();
-            return conn.Query<T>(sql);
+            return conn.Query<T>(sql,parameters);
         }
         public bool Update<T>(T entity) where T : class
         {
@@ -133,14 +145,18 @@ namespace Overhaul.Core
             return ModelTracker.GetTableName(t);
         }
 
-        private static string Fix<T>(string[] str)
+        private static string ResolveColumns<T>(string[] str)
         {
+            if (str.Length == 0)
+            {
+                return string.Empty;
+            }
+            
             // Include entity id when user specifies columns
             // If it has one of course 
             var keyId = typeof(T).GetProperties().
                 Where(i => i.CustomAttributes.Any(a => a.AttributeType == typeof(KeyAttribute)));
 
-            if (str.Length == 0) return string.Empty;
             // All but the last one
             var defaultColumns = string.Join(",", str);
             return $"{(keyId.Any() ? $"{keyId.First().Name}," : "")}{defaultColumns}";
