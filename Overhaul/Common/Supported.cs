@@ -87,6 +87,11 @@ namespace Overhaul.Common
             {
                 _type = Nullable.GetUnderlyingType(property.PropertyType);
             }
+            else if(property.PropertyType.IsEnum)
+            {
+                // for now
+                _type = typeof(byte); 
+            }
             else
             {
                 _type = property.PropertyType;
@@ -130,6 +135,7 @@ namespace Overhaul.Common
 
         internal static bool ValidProperty(PropertyInfo info)
         {
+            // Ignore
             if(info.CustomAttributes.Any(i => typeof(ComputedAttribute) == i.AttributeType))
             {
                 return false;

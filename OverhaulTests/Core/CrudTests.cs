@@ -43,7 +43,10 @@ namespace Overhaul.Core.Tests
             model = CreateCrudInstance();
 
             Enumerable.Range(0, 10)
-                .Select(i => new Document())
+                .Select(i => new Document 
+                {
+                    DocumentState = DocumentState.None
+                })
                 .AsParallel().ForAll(d => model.Create(d));
 
             // Act
@@ -51,6 +54,7 @@ namespace Overhaul.Core.Tests
 
             // Assert
             Assert.AreEqual(5, doc.DocumentId);
+            Assert.AreEqual(DocumentState.None, doc.DocumentState);
         }
         [TestMethod]
         public void GetByIdColumnsTest()
@@ -307,6 +311,13 @@ namespace Overhaul.Core.Tests
             public byte Byte { get; set; }
             public bool Bool { get; set; }
             public DateTime DateTime { get; set; } = DateTime.Now;
+            public DocumentState DocumentState { get; set; }
+        }
+
+        public enum DocumentState : int
+        {
+            Null = 0,
+            None
         }
     }
 }
