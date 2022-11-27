@@ -61,6 +61,7 @@ namespace Overhaul.Core
             IEnumerable<string> deletedColumns)
         {
             // If they start the same but string length are not equal
+            // Might cause a bug :) future me
             var updatedColumns = addedColumns.Where(i => IsAmlostValid(deletedColumns, i));
             addedColumns = addedColumns.Where(i => !updatedColumns.Contains(i));
             deletedColumns = deletedColumns.Where(i => !updatedColumns.Contains(i));
