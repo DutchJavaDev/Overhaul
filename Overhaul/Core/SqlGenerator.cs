@@ -1,4 +1,5 @@
 ﻿using System.Data.SqlClient;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Dapper;
 using Dapper.Contrib.Extensions;
@@ -34,7 +35,7 @@ namespace Overhaul.Core
             using (Connection = Create())
             {
                 var sql = $"CREATE TABLE {tableDef.TableName} " +
-                    $"({tableDef.ColumnCollection.Replace(";",",")})";
+               $"({tableDef.ColumnCollection.Replace(";", ",")})";
 
                 Connection.ExecuteScalar(sql);
                 Connection.Insert(tableDef);

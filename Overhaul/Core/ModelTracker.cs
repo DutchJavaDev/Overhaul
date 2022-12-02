@@ -10,7 +10,7 @@ namespace Overhaul.Core
 {
     public sealed class ModelTracker : IModelTracker
     {
-        internal static ModelTrackerOptions Options;
+        internal static ModelTrackerOptions Options = new();
         private string ConnectionString { get; init; }
 
         private static IEnumerable<TableDefinition> _cache;

@@ -16,7 +16,7 @@ namespace OverhaulTests
             var builder = new ConfigurationBuilder()
                .AddEnvironmentVariables()
                .AddUserSecrets(typeof(TestHelper).Assembly);
-            // Order is reversed when looking up
+            // Order is reversed when looking up keys
 
             var configurationRoot = builder.Build();
 
