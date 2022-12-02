@@ -9,6 +9,7 @@
         /// <param name="entity"></param>
         /// <returns>Inserted entity</returns>
         T Create<T>(T entity) where T : class;
+        Task<T> CreateAsync<T>(T entity) where T : class;
 
         /// <summary>
         /// Reads the first entity from the database
@@ -16,6 +17,7 @@
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         T Read<T>(params string[] columns) where T : class;
+        Task<T> ReadAsync<T>(params string[] columns) where T : class;
 
         /// <summary>
         /// Updates an existing entity
@@ -24,6 +26,8 @@
         /// <param name="entity"></param>
         /// <returns></returns>
         bool Update<T>(T entity) where T : class;
+        Task<bool> UpdateAsync<T>(T entity) where T : class;
+
         /// <summary>
         /// Gets a entity by its primary key/id
         /// </summary>
@@ -31,6 +35,8 @@
         /// <param name="id"></param>
         /// <returns></returns>
         T GetById<T>(object id, params string[] columns) where T : class;
+        Task<T> GetByIdAsync<T>(object id, params string[] columns) where T : class;
+
         /// <summary>
         /// Gets an entity by a specific column field
         /// </summary>
@@ -39,12 +45,16 @@
         /// <param name="value"></param>
         /// <returns></returns>
         T GetBy<T>(string columnName, object value, params string[] columns) where T : class;
+        Task<T> GetByAsync<T>(string columnName, object value, params string[] columns) where T : class;
+
         /// <summary>
         /// Gets a collection of entity's
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         IEnumerable<T> GetCollection<T>(params string[] columns) where T : class;
+        Task<IEnumerable<T>> GetCollectionAsync<T>(params string[] columns) where T : class;
+
         /// <summary>
         /// Gets s collection of entity's based of a column value 
         /// </summary>
@@ -53,6 +63,8 @@
         /// <param name="value"></param>
         /// <returns></returns>
         IEnumerable<T> GetCollectionWhere<T>(string columnName, object value, params string[] columns) where T : class;
+        Task<IEnumerable<T>> GetCollectionWhereAsync<T>(string columnName, object value, params string[] columns) where T : class;
+
         /// <summary>
         /// Delete an existing entity
         /// </summary>
