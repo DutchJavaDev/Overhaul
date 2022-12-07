@@ -24,7 +24,6 @@ namespace Overhaul.Core
 
             Options = options;
 
-            // If debug read connection string from secrets?
             sqlGenerator = new SqlGenerator(connectionString);
             sqlModifier = new SqlModifier(connectionString);
 
