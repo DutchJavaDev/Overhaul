@@ -28,7 +28,7 @@ namespace Overhaul.Core
             sqlModifier = new SqlModifier(connectionString);
 
             // Check Db
-            _cache = LoadCache();
+            _cache = LoadDatabaseCace();
             
             schemaManager = new SchemaManager(sqlGenerator,sqlModifier);
 
@@ -59,21 +59,21 @@ namespace Overhaul.Core
             return new Crud(_cache, ConnectionString);
         }
 
-        private IEnumerable<TableDefinition> LoadCache()
+        private IEnumerable<TableDefinition> LoadDatabaseCace()
         {
             var def = BuildDef(typeof(TableDefinition));
 
             if (!sqlGenerator.TableExists(def.TableName))
             {
                 sqlGenerator.CreateTable(def);
-                // Define system tables
                 // Don't return def since it has just been created
                 // Otherwise it will trigger a create table ... again
                 return Enumerable.Empty<TableDefinition>();
             }
 
             return sqlGenerator.GetCollection()
-                .Where(i => i.Id > 1); // Skipping Table def, will get deleted since its not part of the 'new' types
+                .Where(i => i.Id > 1); // Skipping the TableDefinition for TableDefinition,
+                                       // otherwise it will get deleted since its not part of the 'new' types
         }
 
         // Move to class
