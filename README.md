@@ -10,6 +10,17 @@ https://gelatinous-archer-556.notion.site/Overhaul-MT-Model-Tracker-74fb2ce6fe32
 
 # Getting started
 ```csharp
+[Table("tblDocument")]
+class Document 
+{
+  [Key]
+  public int Id { get; set; }
+  [Precision(500)]
+  public string Name { get; set; }
+  public string Contents { get; set; }
+  public DateTime DateCreated { get; set; }
+}
+
 // Define your entitty's
 var types = new[] { typeof(Document) };
 
@@ -21,7 +32,6 @@ var tracker = new ModelTracker(connectionString);
 
 // Call track methode with your entity's as parameter
 tracker.Track(types);
-
 
 // Get instance of the CRUD 
 var crud = tracker.GetCrudInstance();
