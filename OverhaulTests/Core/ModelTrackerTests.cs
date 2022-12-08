@@ -7,21 +7,6 @@ namespace Overhaul.Core.Tests
     [TestClass()]
     public class ModelTrackerTests
     {
-        // This is a feature
-        //[TestMethod()]
-        //public void TrackTest()
-        //{
-        //    // Arrange
-        //    var types = new[]
-        //    {
-        //        typeof(NoTableAttributeClass),
-        //        typeof(TableAttributeClass)
-        //    };
-
-        //    // Act
-        //    ModelTracker.Track(types, TestHelper.GetString("devString"));
-        //}
-
         [TestMethod]
         public void CreateDefenitionsTest()
         {
@@ -44,8 +29,8 @@ namespace Overhaul.Core.Tests
             Assert.AreEqual(noAttr.TableName, "NoTableAttributeClass");
             Assert.AreEqual(attr.TableName, "customName");
 
-            Assert.AreEqual(noAttr.ColumnCollection, string.Empty);
-            Assert.AreEqual(attr.ColumnCollection, string.Empty);
+            Assert.AreEqual("Name FLOAT", noAttr.ColumnCollection);
+            Assert.AreEqual("Age INT", attr.ColumnCollection);
 
             Assert.AreEqual(noAttr.DefType, types[0].Name);
             Assert.AreEqual(attr.DefType, types[1].Name);
@@ -67,7 +52,7 @@ namespace Overhaul.Core.Tests
         [TestMethod]
         public void GeTableTableNameTest()
         {
-            // Arrane
+            // Arrange
             var _type = typeof(NoTableAttributeClass);
 
             // Act
@@ -87,10 +72,14 @@ namespace Overhaul.Core.Tests
         }
 
         private sealed class NoTableAttributeClass 
-        { }
+        {
+            public double Name { get; set; }
+        }
 
         [Table("customName")]
         private sealed class TableAttributeClass
-        { }
+        {
+            public int Age { get; set; }
+        }
     }
 }
