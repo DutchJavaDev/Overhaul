@@ -15,7 +15,6 @@ namespace Overhaul.Core.Tests
 
         // Parameters
         private ISqlGenerator sqlGenerator;
-        private ISqlModifier sqlModifier;
         private const string TableName = "mod";
          
         [TestInitialize]
@@ -24,9 +23,7 @@ namespace Overhaul.Core.Tests
             var connection = TestHelper.GetString("devString");
 
             sqlGenerator = new SqlGenerator(connection);
-            sqlModifier = new SqlModifier(connection);
-
-            model = new SchemaManager(sqlGenerator,sqlModifier);
+            model = new SchemaManager(connection);
 
             sqlGenerator.DeleteTable(TableName);
 

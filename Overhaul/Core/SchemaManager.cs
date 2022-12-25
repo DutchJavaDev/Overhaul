@@ -1,5 +1,9 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Data.Common;
+using System.Data.SqlClient;
+using System.Runtime.CompilerServices;
+using System.Text;
 using System.Text.RegularExpressions;
+using Dapper;
 using Overhaul.Common;
 using Overhaul.Data;
 using Overhaul.Interface;
@@ -9,41 +13,74 @@ namespace Overhaul.Core
 {
     internal sealed class SchemaManager : ISchemaManager
     {
-        private readonly ISqlGenerator sqlGenerator;
-        private readonly ISqlModifier sqlModifier;
-        public SchemaManager(ISqlGenerator gen, ISqlModifier mod)
+        private readonly string ConnectionString;
+        public SchemaManager(string connectionString)
         {
-            sqlGenerator = gen;
-            sqlModifier = mod;
+            ConnectionString = connectionString;
         }
 
         public void RunSchemaCreate(IEnumerable<TableDefinition> addedTables)
         {
-            addedTables.AsParallel().ForAll(i => sqlGenerator.CreateTable(i));
+            var queryBuilder = new StringBuilder();
+
+            foreach (var table in addedTables)
+            {
+                queryBuilder.AppendLine($"{DefaultQuery.CreateTable(table.TableName, table.ColumnCollection)};");
+            }
+
+            using var conn = Create();
+            conn.ExecuteScalar(queryBuilder.ToString());
         }
 
         public void RunSchemaUpdate(IEnumerable<TableDefinition> modifiedTables, 
             IEnumerable<TableDefinition> _cache)
         {
-            modifiedTables.AsParallel().ForAll(newType =>
+            var queryBuilder = new StringBuilder();
+
+            foreach (var newType in modifiedTables)
             {
                 var oldType = _cache.Where(i => i.DefType == newType.DefType
 #if DEBUG
-                || i.TableName == newType.TableName
+               || i.TableName == newType.TableName
 #endif
-                ).FirstOrDefault();
-                GetChanges(newType, oldType, 
-                    out IEnumerable<string> addedColumns, 
+               ).FirstOrDefault();
+                
+                GetChanges(newType, oldType,
+                    out IEnumerable<string> addedColumns,
                     out IEnumerable<string> updatedColumns,
                     out IEnumerable<string> deletedColumns);
-                updatedColumns.AsParallel().ForAll(column => sqlModifier.UpdateColumn(newType.TableName, column));
-                deletedColumns.AsParallel().ForAll(column => sqlModifier.DeleteColumn(newType.TableName, column));
-                addedColumns.AsParallel().ForAll(column => sqlModifier.AddColumn(newType.TableName, column));
-            });
+
+                var tasks = new List<Task>();
+
+
+                using var conn = Create();
+                tasks.AddRange(updatedColumns.Select(updatedColumn => Task.Run(() => 
+                {
+                    conn.ExecuteScalar(DefaultQuery.AlterColumn(newType.TableName, updatedColumn));
+                })));
+
+                tasks.AddRange(deletedColumns.Select(deletedColumn => Task.Run(() =>
+                {
+                    conn.ExecuteScalar(DefaultQuery.DeleteColumn(newType.TableName, deletedColumn));
+                })));
+
+                tasks.AddRange(addedColumns.Select(addedColumn => Task.Run(() =>
+                {
+                    conn.ExecuteScalar(DefaultQuery.AddColumn(newType.TableName, addedColumn));
+                })));
+
+                Task.WhenAll(tasks)
+                    .Wait();
+            }
         }
         public void RunSchemaDelete(IEnumerable<TableDefinition> deleteTables)
         {
-            deleteTables.AsParallel().ForAll(i => sqlGenerator.DeleteTable(i.TableName));
+            var tasks = new List<Task>();
+
+            using var conn = Create();
+            Task.WhenAll(deleteTables.Select(table => Task.Run(() => {
+                conn.ExecuteScalar($"DROP TABLE {table.TableName}");
+            }))).Wait();
         }
 
         private static void GetChanges(TableDefinition table, TableDefinition oldType,
@@ -84,6 +121,13 @@ namespace Overhaul.Core
 
                 return addedMinus == deletedMinus;
             });
+        }
+
+        private SqlConnection Create()
+        {
+            var connection = new SqlConnection(ConnectionString);
+            connection.Open();
+            return connection;
         }
     }
 }

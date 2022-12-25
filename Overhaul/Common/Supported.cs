@@ -12,7 +12,7 @@ namespace Overhaul.Common
 {
     internal static class Supported
     {
-        private readonly static Dictionary<Type, string> SqlTypes = new()
+        private readonly static Dictionary<Type, string> DefaultTypes = new()
         {
             {typeof(int), "INT"},
             {typeof(double), "FLOAT"},
@@ -27,13 +27,13 @@ namespace Overhaul.Common
             {typeof(char), "CHAR" }
         };
 
-        private readonly static List<Type> SqlIdentityTypes = new()
+        private readonly static List<Type> IdentityTypes = new()
         {
             typeof(int),
             typeof(Guid),
         };
 
-        public static PropertyInfo[] GetPropertiesForType(Type type)
+        public static PropertyInfo[] GetTypeProperties(Type type)
         {
             return type.GetProperties().Where(i => ValidProperty(i))
                 .ToArray();
@@ -73,70 +73,10 @@ namespace Overhaul.Common
             return GetDifferenceFromCollections(self, other);
         }
 
-        private static IEnumerable<T> GetDifferenceFromCollections<T>(IEnumerable<T> source, IEnumerable<T> target)
-        {
-            return source.Where(i => !target.Contains(i));
-        }
-
-        private static string GetColumnDefinition(PropertyInfo property)
-        {
-            Type _type;
-
-            if (property.PropertyType.IsGenericType
-                && property.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
-            {
-                _type = Nullable.GetUnderlyingType(property.PropertyType);
-            }
-            else if(property.PropertyType.IsEnum)
-            {
-                // for now
-                _type = typeof(byte); 
-            }
-            else
-            {
-                _type = property.PropertyType;
-            }
-
-            var name = property.Name;
-            var type = _type;
-            var column = SqlTypes[type];
-
-            if (IsIdentityType(property))
-            {
-                column += " IDENTITY(1,1) ";
-            }
-
-            if (IsDefined(property, typeof(PrecisionAttribute))
-                && property.GetCustomAttribute<PrecisionAttribute>() is
-                PrecisionAttribute strab)
-            {
-                if (column.Contains('('))
-                {
-                    column = Regex.Replace(column, "[1-9]{1,}", strab.Precision);
-                }
-                else
-                {
-                    column += $"({strab.Precision})";
-                }
-            }
-
-            return $"{name} {column}";
-        }
-
-        private static bool IsIdentityType(PropertyInfo type)
-        {
-            return IsDefined(type, typeof(KeyAttribute))
-                && SqlIdentityTypes.Contains(type.PropertyType);
-        }
-        private static bool IsDefined(MemberInfo info, Type attribute)
-        {
-            return Attribute.IsDefined(info, attribute, true);
-        }
-
         internal static bool ValidProperty(PropertyInfo info)
         {
             // Ignore
-            if(info.CustomAttributes.Any(i => typeof(ComputedAttribute) == i.AttributeType))
+            if (info.CustomAttributes.Any(i => typeof(ComputedAttribute) == i.AttributeType))
             {
                 return false;
             }
@@ -151,5 +91,80 @@ namespace Overhaul.Common
                 publicSet.Value &&
                 publicGet.Value;
         }
-    } 
+
+
+        private static IEnumerable<T> GetDifferenceFromCollections<T>(IEnumerable<T> source, IEnumerable<T> target)
+        {
+            return source.Where(i => !target.Contains(i));
+        }
+
+        private static string GetColumnDefinition(PropertyInfo property)
+        {
+            Type type = GetType(property);
+
+            var name = property.Name;
+            var column = DefaultTypes[type];
+
+            if (IsIdentityType(property))
+            {
+                column += " IDENTITY(1,1) ";
+            }
+
+            if (IsDefined(property, typeof(PrecisionAttribute))
+                && property.GetCustomAttribute<PrecisionAttribute>() is
+                PrecisionAttribute precision)
+            {
+                column = GetPrecision(column, precision);
+            }
+
+            return $"{name} {column}";
+        }
+
+        private static Type GetType(PropertyInfo property)
+        {
+            Type _type;
+            if (property.PropertyType.IsGenericType
+                            && property.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
+            {
+                _type = Nullable.GetUnderlyingType(property.PropertyType);
+            }
+            else if (property.PropertyType.IsEnum)
+            {
+                // for now
+                _type = typeof(byte);
+            }
+            else
+            {
+                _type = property.PropertyType;
+            }
+
+            return _type;
+        }
+
+        private static string GetPrecision(string column, PrecisionAttribute strab)
+        {
+            if (column.Contains('('))
+            {
+                column = Regex.Replace(column, "[1-9]{1,}", strab.Precision);
+            }
+            else
+            {
+                column += $"({strab.Precision})";
+            }
+
+            return column;
+        }
+
+        private static bool IsIdentityType(PropertyInfo type)
+        {
+            return IsDefined(type, typeof(KeyAttribute))
+                && IdentityTypes.Contains(type.PropertyType);
+        }
+
+        private static bool IsDefined(MemberInfo info, Type attribute)
+        {
+            return Attribute.IsDefined(info, attribute, true);
+        }
+
+    }
 }

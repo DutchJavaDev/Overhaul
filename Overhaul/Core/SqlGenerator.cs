@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Dapper;
 using Dapper.Contrib.Extensions;
+using Overhaul.Common;
 using Overhaul.Data;
 using Overhaul.Interface;
 
@@ -14,11 +15,14 @@ namespace Overhaul.Core
         public SqlConnectionStringBuilder ConnectionBuilder { get; init; }
         public SqlConnection Connection { get; set; }
         public string ConnectionString { get; init; }
+        private readonly string GetCollectionQuery;
 
         public SqlGenerator(string connectionString)
         {
             ConnectionString = connectionString;
             ConnectionBuilder = new (connectionString);
+            GetCollectionQuery = $"SELECT * FROM {ModelTracker.GetTableName(typeof(TableDefinition))}" +
+                $" WHERE {nameof(TableDefinition.Id)} > 1";
         }
 
         public IEnumerable<TableDefinition> GetCollection()
@@ -26,7 +30,7 @@ namespace Overhaul.Core
             // Wont work until insert is done 
             using (Connection = Create())
             { 
-                return Connection.GetAll<TableDefinition>();
+                return Connection.Query<TableDefinition>(GetCollectionQuery);
             }
         }
 
@@ -34,10 +38,8 @@ namespace Overhaul.Core
         {
             using (Connection = Create())
             {
-                var sql = $"CREATE TABLE {tableDef.TableName} " +
-               $"({tableDef.ColumnCollection.Replace(";", ",")})";
-
-                Connection.ExecuteScalar(sql);
+                var query = DefaultQuery.CreateTable(tableDef.TableName,tableDef.ColumnCollection);
+                Connection.ExecuteScalar(query);
                 Connection.Insert(tableDef);
             }
 
