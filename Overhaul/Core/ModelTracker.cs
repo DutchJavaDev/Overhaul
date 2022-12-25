@@ -1,5 +1,7 @@
-﻿using System.Reflection;
+﻿using System.Data.SqlClient;
+using System.Reflection;
 using System.Runtime.CompilerServices;
+using Dapper;
 using Dapper.Contrib.Extensions;
 using Overhaul.Common;
 using Overhaul.Data;
@@ -11,57 +13,50 @@ namespace Overhaul.Core
     public sealed class ModelTracker : IModelTracker
     {
         internal static ModelTrackerOptions Options = new();
-        private string ConnectionString { get; init; }
-
-        private static IEnumerable<TableDefinition> _cache;
+        private readonly string ConnectionString;
         private readonly ISqlGenerator sqlGenerator;
-        private readonly ISqlModifier sqlModifier;
         private readonly ISchemaManager schemaManager;
+        private readonly IEnumerable<TableDefinition> databaseDefinitions;
 
         public ModelTracker(string connectionString, ModelTrackerOptions options = null)
         {
-            options ??= new ModelTrackerOptions();
-
-            Options = options;
+            Options = options ?? new ModelTrackerOptions();
 
             sqlGenerator = new SqlGenerator(connectionString);
-            sqlModifier = new SqlModifier(connectionString);
 
-            // Check Db
-            _cache = LoadDatabaseCace();
+            databaseDefinitions = LoadDatabaseDefinitons();
             
-            schemaManager = new SchemaManager(sqlGenerator,sqlModifier);
+            schemaManager = new SchemaManager(connectionString);
 
             ConnectionString = connectionString;
         }
 
         public void Track(IEnumerable<Type> types)
         {
-            // Create definitions
             var definitions = CreateDefinitions(types);
             
-            if (definitions.Any() || _cache.Any())
+            if (definitions.Any() || databaseDefinitions.Any())
             {
                 schemaManager.RunSchemaCreate(definitions.Where(i => 
-                !_cache.Any(ii => ii.DefType == i.DefType)));
+                !databaseDefinitions.Any(ii => ii.DefType == i.DefType)));
 
                 // DefType are the same but columns don't match up
                 // overridden equals for tableDef
                 schemaManager.RunSchemaUpdate(definitions.Where(i
-                    => _cache.Any(ii => ii.DefType == i.DefType && !i.Equals(ii))), _cache);
+                    => databaseDefinitions.Any(ii => ii.DefType == i.DefType && !i.Equals(ii))), databaseDefinitions);
                 
-                schemaManager.RunSchemaDelete(_cache.Where(i => !definitions.Any(ii => i.Equals(ii))));
+                schemaManager.RunSchemaDelete(databaseDefinitions.Where(i => !definitions.Any(ii => i.Equals(ii))));
             }
         }
 
         public ICrud GetCrudInstance()
         {
-            return new Crud(_cache, ConnectionString);
+            return new Crud(databaseDefinitions, ConnectionString);
         }
 
-        private IEnumerable<TableDefinition> LoadDatabaseCace()
+        private IEnumerable<TableDefinition> LoadDatabaseDefinitons()
         {
-            var def = BuildDef(typeof(TableDefinition));
+            var def = BuildDefinitions(typeof(TableDefinition));
 
             if (!sqlGenerator.TableExists(def.TableName))
             {
@@ -71,23 +66,21 @@ namespace Overhaul.Core
                 return Enumerable.Empty<TableDefinition>();
             }
 
-            return sqlGenerator.GetCollection()
-                .Where(i => i.Id > 1); // Skipping the TableDefinition for TableDefinition,
-                                       // otherwise it will get deleted since its not part of the 'new' types
+            return sqlGenerator.GetCollection();
         }
 
         // Move to class
         internal static IEnumerable<TableDefinition> 
             CreateDefinitions(IEnumerable<Type> types)
         {
-            return types.AsParallel().Select(i => BuildDef(i));
+            return types.Select(i => BuildDefinitions(i));
         }
 
         // Move to class
-        private static TableDefinition BuildDef(Type type)
+        private static TableDefinition BuildDefinitions(Type type)
         {
             var tableName = GetTableName(type);
-            var properties = Supported.GetPropertiesForType(type);
+            var properties = Supported.GetTypeProperties(type);
             var columnCollection = 
                 Supported.ConvertPropertiesToTypesString(properties, out var count);
 
@@ -111,7 +104,6 @@ namespace Overhaul.Core
             }
             return type.Name;
         }
-
 #if DEBUG 
         // Only needed when debugging, running test
         public static void DeleteTestTables(Type[] tables, string conn = "", bool deleteDef = false)
@@ -125,7 +117,7 @@ namespace Overhaul.Core
                 del.Add(typeof(TableDefinition));
             }
 
-            var types = del.Select(i => BuildDef(i)).ToList();
+            var types = del.Select(i => BuildDefinitions(i)).ToList();
 
             foreach (var table in types)
             {

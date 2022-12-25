@@ -26,7 +26,7 @@ namespace Overhaul.Common.Tests
         public void GetPropertiesForTypeTest()
         {
             // Act
-            var types = Supported.GetPropertiesForType(_type);
+            var types = Supported.GetTypeProperties(_type);
 
             // Assert
             Assert.IsTrue(types.Any(i => i.Name.Equals("Int")));
@@ -38,7 +38,7 @@ namespace Overhaul.Common.Tests
         public void ConvertPropertiesToTypesStringTest()
         {
             // Arrange
-            var types = Supported.GetPropertiesForType(_type);
+            var types = Supported.GetTypeProperties(_type);
 
             // Act
             var strQuery = Supported.ConvertPropertiesToTypesString(types, out int count);
@@ -109,7 +109,7 @@ namespace Overhaul.Common.Tests
         public void ConvertTypesStringToArray()
         {
             // Arrange
-            var types = Supported.GetPropertiesForType(_type);
+            var types = Supported.GetTypeProperties(_type);
             var strQuery = Supported.ConvertPropertiesToTypesString(types, out int count);
 
             // Act
