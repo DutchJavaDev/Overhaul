@@ -1,7 +1,6 @@
 ﻿using System.Data.SqlClient;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using Dapper;
 using Dapper.Contrib.Extensions;
 using Overhaul.Common;
 using Overhaul.Data;
