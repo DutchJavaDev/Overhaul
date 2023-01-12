@@ -9,7 +9,7 @@ namespace Overhaul.Core.Tests
     [TestClass()]
     public sealed class SqlGeneratorTests
     {
-        private ISqlGenerator model { get; set; }
+        private ISqlGenerator model;
 
         private static Type Type = typeof(TableClass);
 
@@ -18,13 +18,14 @@ namespace Overhaul.Core.Tests
         {
             var connection = TestHelper.GetString("devString");
 
-            model = new SqlGenerator(connection);
+            ConnectionManager.SetConnectionString(connection);
+
+            model = new SqlGenerator();
 
             ModelTracker.DeleteTestTables(new[] { Type }, connection);
         }
 
-        // exclude until fixed
-        //[TestMethod]
+        [TestMethod]
         public void BGetcollectionTest()
         {
             // Act
@@ -34,7 +35,7 @@ namespace Overhaul.Core.Tests
             Assert.IsNotNull(result);
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void ACreateTableTest()
         {
             // Arrange
@@ -47,7 +48,7 @@ namespace Overhaul.Core.Tests
             Assert.IsTrue(result);
         }
 
-        [TestMethod()]
+        [TestMethod]
         public void CDeleteTableTest()
         {
             // Arrange

@@ -19,6 +19,7 @@ namespace Overhaul.Core.Tests
         public void Init()
         {
             ConnectionString = TestHelper.GetString("devString");
+            ModelTracker.DeleteTestTables(Types, ConnectionString, true);
         }
 
         [TestMethod()]
@@ -41,14 +42,12 @@ namespace Overhaul.Core.Tests
         {
             // Arrange
             model = CreateCrudInstance();
-
-            Enumerable.Range(0, 10)
-                .Select(i => new Document 
-                {
-                    DocumentState = DocumentState.None
-                })
-                .AsParallel().ForAll(d => model.Create(d));
-
+            for(var i = 0; i < 10; i++)
+            {
+                model.Create(new Document {
+                DocumentState = DocumentState.None
+                });
+            }
             // Act
             var doc = model.GetById<Document>(5);
 

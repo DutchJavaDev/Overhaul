@@ -31,7 +31,15 @@ namespace Overhaul.Common.Tests
             // Assert
             Assert.IsTrue(types.Any(i => i.Name.Equals("Int")));
             Assert.IsTrue(types.Any(i => i.Name.Equals("String")));
-            // when im bored write the rest :)
+            Assert.IsTrue(types.Any(i => i.Name.Equals("Float")));
+            Assert.IsTrue(types.Any(i => i.Name.Equals("Decimal")));
+            Assert.IsTrue(types.Any(i => i.Name.Equals("Char")));
+            Assert.IsTrue(types.Any(i => i.Name.Equals("Double")));
+            Assert.IsTrue(types.Any(i => i.Name.Equals("Guid")));
+            Assert.IsTrue(types.Any(i => i.Name.Equals("Short")));
+            Assert.IsTrue(types.Any(i => i.Name.Equals("Byte")));
+            Assert.IsTrue(types.Any(i => i.Name.Equals("Bool")));
+            Assert.IsTrue(types.Any(i => i.Name.Equals("DateTime")));
         }
 
         [TestMethod()]
@@ -102,8 +110,6 @@ namespace Overhaul.Common.Tests
             // Assert
             Assert.AreEqual("DateTime DATETIME", result.First());
         }
-
-
 
         [TestMethod]
         public void ConvertTypesStringToArray()

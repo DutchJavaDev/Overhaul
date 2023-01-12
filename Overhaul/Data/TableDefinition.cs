@@ -2,7 +2,7 @@
 
 namespace Overhaul.Data
 {
-    [Table("tblDef")]
+    [Table("tblDefinition")]
     internal sealed class TableDefinition
     {
         [Key]
@@ -49,7 +49,7 @@ namespace Overhaul.Data
 
         public override int GetHashCode()
         {
-            return base.GetHashCode();
+            return base.GetHashCode() * 17;
         }
     }
 }
