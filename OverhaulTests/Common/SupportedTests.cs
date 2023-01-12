@@ -111,8 +111,6 @@ namespace Overhaul.Common.Tests
             Assert.AreEqual("DateTime DATETIME", result.First());
         }
 
-
-
         [TestMethod]
         public void ConvertTypesStringToArray()
         {
