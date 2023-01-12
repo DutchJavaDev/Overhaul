@@ -20,6 +20,7 @@ namespace OverhaulTests.Core
         public void Init()
         {
             ConnectionString = TestHelper.GetString("devString");
+            ConnectionManager.SetConnectionString(ConnectionString);
             ModelTracker.DeleteTestTables(Types, ConnectionString, true);
         }
 

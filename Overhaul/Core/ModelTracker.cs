@@ -11,7 +11,6 @@ namespace Overhaul.Core
     public sealed class ModelTracker : IModelTracker
     {
         internal static ModelTrackerOptions Options = new();
-        private readonly string ConnectionString;
         private readonly ISqlGenerator sqlGenerator;
         private readonly ISchemaManager schemaManager;
         private readonly IEnumerable<TableDefinition> databaseDefinitions;
@@ -24,11 +23,9 @@ namespace Overhaul.Core
 
             sqlGenerator = new SqlGenerator();
 
-            databaseDefinitions = LoadDatabaseDefinitons();
-            
             schemaManager = new SchemaManager();
-
-            ConnectionString = connectionString;
+            
+            databaseDefinitions = LoadDatabaseDefinitons();
         }
 
         public void Track(IEnumerable<Type> types)
@@ -134,6 +131,11 @@ namespace Overhaul.Core
         // Only needed when debugging, running test
         public static void DeleteTestTables(Type[] tables, string conn = "", bool deleteDef = false)
         {
+            if (!string.IsNullOrEmpty(conn))
+            {
+                ConnectionManager.SetConnectionString(conn);
+            }
+
             var sqlGenerator = new SqlGenerator();
             var del = tables.ToList();
 
