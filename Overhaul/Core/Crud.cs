@@ -13,26 +13,23 @@ namespace Overhaul.Core
 {
     internal sealed class Crud : ICrud
     {
-        private readonly IEnumerable<TableDefinition> tableDefinitions;
-        private readonly string ConnectionString;
+        private readonly IEnumerable<TableDefinition> _tableDefinitions;
 
-        public Crud(IEnumerable<TableDefinition> tables, 
-            string connectionString)
+        public Crud(IEnumerable<TableDefinition> tableDefinitions)
         {
-            tableDefinitions = tables;
-            ConnectionString = connectionString;
+            _tableDefinitions = tableDefinitions;
         }
         
         public T Create<T>(T entity) where T : class
         {
-            using var conn = Create();
+            using var conn = ConnectionManager.GetSqlConnection();
             conn.Insert(entity);
             return entity;
         }
         
         public async Task<T> CreateAsync<T>(T entity) where T : class
         {
-            using var conn = Create();
+            using var conn = ConnectionManager.GetSqlConnection();
             await conn.InsertAsync(entity);
             return entity;
         }
@@ -56,13 +53,13 @@ namespace Overhaul.Core
                 var query = DefaultQuery.GetById(tableColumns,
                     keyId.Name, GetTableName(typeof(T)));
 
-                using (conn = Create())
+                using (conn = ConnectionManager.GetSqlConnection())
                 {
                     return conn.QuerySingle<T>(query, new { id });
                 }
             }
 
-            using (conn = Create())
+            using (conn = ConnectionManager.GetSqlConnection())
             {
                 return conn.Get<T>(id);
             }
@@ -87,14 +84,14 @@ namespace Overhaul.Core
                 var query = DefaultQuery.GetById(tableColumns,
                     keyId.Name, GetTableName(typeof(T)));
 
-                using (conn = await CreateAsync())
+                using (conn = await ConnectionManager.GetSqlConnectionAsync())
                 {
                     return await conn.QuerySingleAsync<T>(query, new { id })
                         .ConfigureAwait(false);
                 }
             }
 
-            using (conn = await CreateAsync())
+            using (conn = await ConnectionManager.GetSqlConnectionAsync())
             {
                 return await conn.GetAsync<T>(id)
                     .ConfigureAwait(false);
@@ -108,7 +105,7 @@ namespace Overhaul.Core
             var query = DefaultQuery.GetBy(tableColumns, 
                 GetTableName(typeof(T)), columnName);
 
-            using var conn = Create();
+            using var conn = ConnectionManager.GetSqlConnection();
             return conn.QuerySingle<T>(query, new { value });
         }
         
@@ -119,7 +116,7 @@ namespace Overhaul.Core
             var query = DefaultQuery.GetBy(tableColumns,
                 GetTableName(typeof(T)), columnName);
 
-            using var conn = Create();
+            using var conn = ConnectionManager.GetSqlConnection();
             return await conn.QuerySingleAsync<T>(query, new { value });
         }
 
@@ -127,7 +124,7 @@ namespace Overhaul.Core
         {
             string tableColumns = GetTableColumns<T>(columns);
             var name = GetTableName(typeof(T));
-            using var conn = Create();
+            using var conn = ConnectionManager.GetSqlConnection();
             return conn.QueryFirstOrDefault<T>(DefaultQuery.Top1(tableColumns, name));
         }
 
@@ -135,7 +132,7 @@ namespace Overhaul.Core
         {
             var tableColumns = GetTableColumns<T>(columns);
             var tableName = GetTableName(typeof(T));
-            using var conn = Create();
+            using var conn = ConnectionManager.GetSqlConnection();
             return await conn.QueryFirstOrDefaultAsync<T>(DefaultQuery.Top1(tableColumns, tableName))
                 .ConfigureAwait(false);
         }
@@ -147,12 +144,12 @@ namespace Overhaul.Core
                 var tableColumns = ResolveColumns<T>(columns);
                 var tableName = GetTableName(typeof(T));
                 var query = DefaultQuery.Select(tableColumns, tableName);
-                using var conn = Create();
+                using var conn = ConnectionManager.GetSqlConnection();
                 return conn.Query<T>(query);
             }
             else
             {
-                using var conn = Create();
+                using var conn = ConnectionManager.GetSqlConnection();
                 return conn.GetAll<T>();
             }
         }
@@ -164,13 +161,13 @@ namespace Overhaul.Core
                 var tableColumns = ResolveColumns<T>(columns);
                 var tableName = GetTableName(typeof(T));
                 var query = DefaultQuery.Select(tableColumns, tableName);
-                using var conn = Create();
+                using var conn = ConnectionManager.GetSqlConnection();
                 return await conn.QueryAsync<T>(query)
                     .ConfigureAwait(false);
             }
             else
             {
-                using var conn = Create();
+                using var conn = ConnectionManager.GetSqlConnection();
                 return await conn.GetAllAsync<T>()
                     .ConfigureAwait(false);
             }
@@ -181,7 +178,7 @@ namespace Overhaul.Core
         {
             var tableColumns = GetTableColumns<T>(columns);
             var query = DefaultQuery.GetBy(tableColumns, GetTableName(typeof(T)), columnName);
-            using var conn = Create();
+            using var conn = ConnectionManager.GetSqlConnection();
             return conn.Query<T>(query, new { value });
         }
 
@@ -190,46 +187,32 @@ namespace Overhaul.Core
         {
             var tableColumns = GetTableColumns<T>(columns);
             var query = DefaultQuery.GetBy(tableColumns, GetTableName(typeof(T)), columnName);
-            using var conn = Create();
+            using var conn = ConnectionManager.GetSqlConnection();
             return await conn.QueryAsync<T>(query, new { value });
         }
 
         public bool Update<T>(T entity) where T : class
         {
-            using var conn = Create();
+            using var conn = ConnectionManager.GetSqlConnection();
             return conn.Update(entity);
         }
 
         public async Task<bool> UpdateAsync<T>(T entity) where T : class
         {
-            using var conn = Create();
+            using var conn = ConnectionManager.GetSqlConnection();
             return await conn.UpdateAsync(entity)
                 .ConfigureAwait(false);
         }
 
         public void Delete<T>(T entity) where T : class
         {
-            using var conn = Create();
+            using var conn = ConnectionManager.GetSqlConnection();
             conn.Delete(entity);
-        }
-
-        private SqlConnection Create()
-        {
-            var sql = new SqlConnection(ConnectionString);
-            sql.Open();
-            return sql;
-        }
-
-        private async Task<SqlConnection> CreateAsync()
-        {
-            var sql = new SqlConnection(ConnectionString);
-            await sql.OpenAsync();
-            return sql;
         }
 
         private string GetTableName(Type t)
         {
-            var items = tableDefinitions.Where(i => i.DefType == t.Name);
+            var items = _tableDefinitions.Where(i => i.DefType == t.Name);
 
             if (items.Any())
             {

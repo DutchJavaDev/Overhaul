@@ -21,6 +21,7 @@ namespace Overhaul.Common
                 query += $"ALTER COLUMN {column}" +
                 $"{(column.Contains("NULL") ? "" : " NULL")}";
             }
+
            return query;
         }
         public static string AlterColumn(string tableName, string column)

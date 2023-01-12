@@ -49,7 +49,7 @@ namespace Overhaul.Data
 
         public override int GetHashCode()
         {
-            return base.GetHashCode();
+            return base.GetHashCode() * 17;
         }
     }
 }

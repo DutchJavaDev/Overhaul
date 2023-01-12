@@ -1,7 +1,5 @@
-﻿using System.Data.SqlClient;
-using System.Reflection;
+﻿using System.Reflection;
 using System.Runtime.CompilerServices;
-using Dapper;
 using Dapper.Contrib.Extensions;
 using Overhaul.Common;
 using Overhaul.Data;
@@ -20,13 +18,15 @@ namespace Overhaul.Core
 
         public ModelTracker(string connectionString, ModelTrackerOptions options = null)
         {
+            ConnectionManager.SetConnectionString(connectionString);
+
             Options = options ?? new ModelTrackerOptions();
 
-            sqlGenerator = new SqlGenerator(connectionString);
+            sqlGenerator = new SqlGenerator();
 
             databaseDefinitions = LoadDatabaseDefinitons();
             
-            schemaManager = new SchemaManager(connectionString);
+            schemaManager = new SchemaManager();
 
             ConnectionString = connectionString;
         }
@@ -44,11 +44,13 @@ namespace Overhaul.Core
         }
         private void CheckForDeletedDefinitions(IEnumerable<TableDefinition> definitions)
         {
-            var deletedDefinitions = databaseDefinitions.Where(i => !definitions.Any(ii => ii.TableName == i.TableName));
+            var deletedDefinitions = databaseDefinitions.Where(i => 
+            !definitions.Any(ii => ii.TableName == i.TableName));
 
             if (deletedDefinitions.Any())
             {
-                schemaManager.RunSchemaDelete(databaseDefinitions.Where(i => !definitions.Any(ii => i.Equals(ii))));
+                schemaManager.RunSchemaDelete(databaseDefinitions.Where(i => 
+                !definitions.Any(ii => i.Equals(ii))));
             }
         }
         private void CheckForUpdatedDefinitions(IEnumerable<TableDefinition> definitions)
@@ -61,7 +63,6 @@ namespace Overhaul.Core
                 // DefType are the same but columns don't match up
                 // overridden equals for tableDef
                 schemaManager.RunSchemaUpdate(updatedDefinitions, databaseDefinitions);
-
             }
         }
         private void CheckForAddedDefinitions(IEnumerable<TableDefinition> definitions)
@@ -76,7 +77,7 @@ namespace Overhaul.Core
         }
         public ICrud GetCrudInstance()
         {
-            return new Crud(databaseDefinitions, ConnectionString);
+            return new Crud(databaseDefinitions);
         }
 
         private IEnumerable<TableDefinition> LoadDatabaseDefinitons()
@@ -133,7 +134,7 @@ namespace Overhaul.Core
         // Only needed when debugging, running test
         public static void DeleteTestTables(Type[] tables, string conn = "", bool deleteDef = false)
         {
-            var sqlGenerator = new SqlGenerator(conn);
+            var sqlGenerator = new SqlGenerator();
             var del = tables.ToList();
 
             if (deleteDef)

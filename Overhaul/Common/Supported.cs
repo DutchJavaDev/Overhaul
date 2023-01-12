@@ -141,15 +141,15 @@ namespace Overhaul.Common
             return _type;
         }
 
-        private static string GetPrecision(string column, PrecisionAttribute strab)
+        private static string GetPrecision(string column, PrecisionAttribute pa)
         {
             if (column.Contains('('))
             {
-                column = Regex.Replace(column, "[1-9]{1,}", strab.Precision);
+                column = Regex.Replace(column, "[1-9]{1,}", pa.Precision);
             }
             else
             {
-                column += $"({strab.Precision})";
+                column += $"({pa.Precision})";
             }
 
             return column;
@@ -163,7 +163,7 @@ namespace Overhaul.Common
 
         private static bool IsDefined(MemberInfo info, Type attribute)
         {
-            return Attribute.IsDefined(info, attribute, true);
+            return Attribute.IsDefined(info, attribute);
         }
 
     }

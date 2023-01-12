@@ -22,8 +22,10 @@ namespace Overhaul.Core.Tests
         {
             var connection = TestHelper.GetString("devString");
 
-            sqlGenerator = new SqlGenerator(connection);
-            model = new SchemaManager(connection);
+            ConnectionManager.SetConnectionString(connection);
+
+            sqlGenerator = new SqlGenerator();
+            model = new SchemaManager();
 
             if (sqlGenerator.TableExists(TableName))
             {

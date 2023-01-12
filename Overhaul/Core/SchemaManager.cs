@@ -1,6 +1,4 @@
-﻿using System.Data.Common;
-using System.Data.SqlClient;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using Dapper;
@@ -9,18 +7,12 @@ using Overhaul.Common;
 using Overhaul.Data;
 using Overhaul.Interface;
 using Dapper.Contrib.Extensions;
-using System.Xml.Serialization;
 
 [assembly: InternalsVisibleTo("OverhaulTests")]
 namespace Overhaul.Core
 {
     internal sealed class SchemaManager : ISchemaManager
     {
-        private static string ConnectionString;
-        public SchemaManager(string connectionString)
-        {
-            ConnectionString = connectionString;
-        }
 
         public void RunSchemaCreate(IEnumerable<TableDefinition> addedDefinitions)
         {
@@ -31,7 +23,7 @@ namespace Overhaul.Core
                 queryBuilder.AppendLine($"{DefaultQuery.CreateTable(table.TableName, table.ColumnCollection)};");
             }
 
-            using var conn = Create();
+            using var conn = ConnectionManager.GetSqlConnection();
             conn.ExecuteScalar(queryBuilder.ToString());
 
             InsertAddedDefinitions(addedDefinitions);
@@ -39,18 +31,11 @@ namespace Overhaul.Core
         public void RunSchemaUpdate(IEnumerable<TableDefinition> modifiedTables, 
             IEnumerable<TableDefinition> _cache)
         {
-            var queryBuilder = new StringBuilder();
-            var tasks = new List<Task>();
-            var queries = new List<string>();
-
-            using var conn = Create();
+            using var conn = ConnectionManager.GetSqlConnection();
             foreach (var newType in modifiedTables)
             {
-                var oldType = _cache.Where(i => i.DefType == newType.DefType
-#if DEBUG
-               || i.TableName == newType.TableName
-#endif
-               ).FirstOrDefault();
+                var oldType = _cache.Where(i => i.DefType == newType.DefType 
+                || i.TableName == newType.TableName).FirstOrDefault();
                 
                 GetChanges(newType, oldType,
                     out IEnumerable<string> addedColumns,
@@ -58,7 +43,7 @@ namespace Overhaul.Core
                     out IEnumerable<string> deletedColumns);
 
                 UpdateColumns(updatedColumns, oldType, newType);
-                DeleteColumns(deletedColumns, oldType, newType);
+                DeleteColumns(deletedColumns, oldType);
                 AddedColumns(addedColumns, oldType, newType);
             }
         }
@@ -66,7 +51,7 @@ namespace Overhaul.Core
         {
             const string ifQuery = "IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = @tableName)";
             
-            using var conn = Create();
+            using var conn = ConnectionManager.GetSqlConnection();
             foreach (var table in deleteTables)
             {
                 conn.ExecuteScalar($"{ifQuery} DROP TABLE {table.TableName}", new
@@ -79,7 +64,7 @@ namespace Overhaul.Core
         private static void UpdateColumns(IEnumerable<string> columns,
             TableDefinition oldType, TableDefinition newType)
         {
-            using var conn = Create();
+            using var conn = ConnectionManager.GetSqlConnection();
             foreach (var column in columns)
             {
                 var query = DefaultQuery.AlterColumn(newType.TableName, column);
@@ -90,23 +75,20 @@ namespace Overhaul.Core
         }
 
         private static void DeleteColumns(IEnumerable<string> columns,
-            TableDefinition oldType, TableDefinition newType)
+            TableDefinition newType)
         {
-            using var conn = Create();
+            using var conn = ConnectionManager.GetSqlConnection();
             foreach (var column in columns)
             {
                 var query = DefaultQuery.DeleteColumn(newType.TableName, column);
                 conn.ExecuteScalar(query);
-                // dont update, column is set to be nullable
-                //newType.Id = oldType.Id;
-                //conn.Update(newType);
             }
         }
 
         private static void AddedColumns(IEnumerable<string> columns,
             TableDefinition oldType, TableDefinition newType)
         {
-            using var conn = Create();
+            using var conn = ConnectionManager.GetSqlConnection();
             foreach (var column in columns)
             {
                 var query = DefaultQuery.AddColumn(newType.TableName, column);
@@ -116,9 +98,9 @@ namespace Overhaul.Core
             }
         }
 
-        private void InsertAddedDefinitions(IEnumerable<TableDefinition> tableDefinitions)
+        private static void InsertAddedDefinitions(IEnumerable<TableDefinition> tableDefinitions)
         {
-            using var conn = Create();
+            using var conn = ConnectionManager.GetSqlConnection();
             conn.BulkInsert(tableDefinitions);
         }
 
@@ -145,6 +127,7 @@ namespace Overhaul.Core
         private static bool IsAmlostValid(IEnumerable<string> deletedColumns, string addedColumn)
         {
             // Regex Time
+            // forgot how this works or why even
             // @"\(.*\)"
             const string patern = @"\(.*\)";
 
@@ -160,11 +143,5 @@ namespace Overhaul.Core
             });
         }
 
-        private static SqlConnection Create()
-        {
-            var connection = new SqlConnection(ConnectionString);
-            connection.Open();
-            return connection;
-        }
     }
 }

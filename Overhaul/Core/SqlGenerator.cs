@@ -1,5 +1,4 @@
 ﻿using System.Data.SqlClient;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Dapper;
 using Dapper.Contrib.Extensions;
@@ -12,31 +11,25 @@ namespace Overhaul.Core
 {
     internal sealed class SqlGenerator : ISqlGenerator
     {
-        public SqlConnectionStringBuilder ConnectionBuilder { get; init; }
-        public SqlConnection Connection { get; set; }
-        public string ConnectionString { get; init; }
-        private readonly string GetCollectionQuery;
+        private const string SchemaCheckQuery = $"SELECT COUNT(*) " +
+                          $"FROM INFORMATION_SCHEMA.TABLES " +
+                          $"WHERE TABLE_NAME = @tableName;";
 
-        public SqlGenerator(string connectionString)
-        {
-            ConnectionString = connectionString;
-            ConnectionBuilder = new (connectionString);
-            GetCollectionQuery = $"SELECT * FROM {ModelTracker.GetTableName(typeof(TableDefinition))}" +
-                $" WHERE {nameof(TableDefinition.Id)} > 1";
-        }
+        public SqlConnection Connection { get; set; }
 
         public IEnumerable<TableDefinition> GetCollection()
         {
             // Wont work until insert is done 
-            using (Connection = Create())
+            using (Connection = ConnectionManager.GetSqlConnection())
             { 
-                return Connection.Query<TableDefinition>(GetCollectionQuery);
+                return Connection.Query<TableDefinition>($"SELECT * FROM {ModelTracker.GetTableName(typeof(TableDefinition))}" +
+                $" WHERE {nameof(TableDefinition.Id)} > 1");
             }
         }
 
         public bool CreateTable(TableDefinition tableDef)
         {
-            using (Connection = Create())
+            using (Connection = ConnectionManager.GetSqlConnection())
             {
                 var query = DefaultQuery.CreateTable(tableDef.TableName,tableDef.ColumnCollection);
                 Connection.ExecuteScalar(query);
@@ -51,7 +44,7 @@ namespace Overhaul.Core
             if (!TableExists(tableName))
                     return true;
 
-            using (Connection = Create())
+            using (Connection = ConnectionManager.GetSqlConnection())
             {
                 var sql = $"DROP TABLE {tableName}";
                 var sqlTableDef = $"DELETE FROM {ModelTracker.GetTableName(typeof(TableDefinition))} WHERE TableName = @tableName";
@@ -66,27 +59,16 @@ namespace Overhaul.Core
         public bool TableExists(string tableName)
         {
             // Only checks for tables within this database [sandbox i guess]
-            using (Connection = Create())
+            using (Connection = ConnectionManager.GetSqlConnection())
             {
-                const string query = $"SELECT COUNT(*) " +
-                          $"FROM INFORMATION_SCHEMA.TABLES " +
-                          $"WHERE TABLE_NAME = @tableName;";
-
                 if (int.TryParse(Connection
-                    .ExecuteScalar(query, new { tableName }).ToString(), 
+                    .ExecuteScalar(SchemaCheckQuery, new { tableName }).ToString(), 
                     out var num))
                 {
                     return num == 1;
                 }
             }
             return false;
-        }
-
-        private SqlConnection Create()
-        {
-            var conn = new SqlConnection(ConnectionString);
-            conn.Open();
-            return conn;
         }
     }
 }
