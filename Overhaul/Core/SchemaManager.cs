@@ -36,11 +36,6 @@ namespace Overhaul.Core
 
             InsertAddedDefinitions(addedDefinitions);
         }
-
-            using var conn = Create();
-            conn.ExecuteScalar(queryBuilder.ToString());
-        }
-
         public void RunSchemaUpdate(IEnumerable<TableDefinition> modifiedTables, 
             IEnumerable<TableDefinition> _cache)
         {
