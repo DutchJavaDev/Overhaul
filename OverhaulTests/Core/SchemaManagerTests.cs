@@ -25,7 +25,10 @@ namespace Overhaul.Core.Tests
             sqlGenerator = new SqlGenerator(connection);
             model = new SchemaManager(connection);
 
-            sqlGenerator.DeleteTable(TableName);
+            if (sqlGenerator.TableExists(TableName))
+            {
+                sqlGenerator.DeleteTable(TableName);
+            }
 
             IModelTracker tracker = new ModelTracker(connection);
 

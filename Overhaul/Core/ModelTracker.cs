@@ -36,18 +36,43 @@ namespace Overhaul.Core
             
             if (definitions.Any() || databaseDefinitions.Any())
             {
-                schemaManager.RunSchemaCreate(definitions.Where(i => 
-                !databaseDefinitions.Any(ii => ii.DefType == i.DefType)));
+                CheckForAddedDefinitions(definitions);
+                CheckForUpdatedDefinitions(definitions);
+                CheckForDeletedDefinitions(definitions);
+            }
+        }
+        private void CheckForDeletedDefinitions(IEnumerable<TableDefinition> definitions)
+        {
+            var deletedDefinitions = databaseDefinitions.Where(i => !definitions.Any(ii => ii.TableName == i.TableName));
 
-                // DefType are the same but columns don't match up
-                // overridden equals for tableDef
-                schemaManager.RunSchemaUpdate(definitions.Where(i
-                    => databaseDefinitions.Any(ii => ii.DefType == i.DefType && !i.Equals(ii))), databaseDefinitions);
-                
+            if (deletedDefinitions.Any())
+            {
                 schemaManager.RunSchemaDelete(databaseDefinitions.Where(i => !definitions.Any(ii => i.Equals(ii))));
             }
         }
+        private void CheckForUpdatedDefinitions(IEnumerable<TableDefinition> definitions)
+        {
+            var updatedDefinitions = definitions.Where(i
+                                => databaseDefinitions.Any(ii => ii.DefType == i.DefType && !i.Equals(ii)));
 
+            if (updatedDefinitions.Any())
+            {
+                // DefType are the same but columns don't match up
+                // overridden equals for tableDef
+                schemaManager.RunSchemaUpdate(updatedDefinitions, databaseDefinitions);
+
+            }
+        }
+        private void CheckForAddedDefinitions(IEnumerable<TableDefinition> definitions)
+        {
+            var addedDefinitons = definitions.Where(i =>
+                            !databaseDefinitions.Any(ii => ii.TableName == i.TableName));
+
+            if (addedDefinitons.Any())
+            {
+                schemaManager.RunSchemaCreate(addedDefinitons);
+            }
+        }
         public ICrud GetCrudInstance()
         {
             return new Crud(databaseDefinitions, ConnectionString);
@@ -120,7 +145,10 @@ namespace Overhaul.Core
 
             foreach (var table in types)
             {
-                sqlGenerator.DeleteTable(table.TableName);
+                if (sqlGenerator.TableExists(table.TableName))
+                {
+                    sqlGenerator.DeleteTable(table.TableName);
+                }
             }
         }
 #endif

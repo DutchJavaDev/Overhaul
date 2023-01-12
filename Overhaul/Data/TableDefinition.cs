@@ -2,7 +2,7 @@
 
 namespace Overhaul.Data
 {
-    [Table("tblDef")]
+    [Table("tblDefinition")]
     internal sealed class TableDefinition
     {
         [Key]

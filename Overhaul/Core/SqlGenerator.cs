@@ -68,14 +68,12 @@ namespace Overhaul.Core
             // Only checks for tables within this database [sandbox i guess]
             using (Connection = Create())
             {
-                var sql = $"SELECT COUNT(*) " +
+                const string query = $"SELECT COUNT(*) " +
                           $"FROM INFORMATION_SCHEMA.TABLES " +
                           $"WHERE TABLE_NAME = @tableName;";
 
-                var parameters = new { tableName = tableName };
-
                 if (int.TryParse(Connection
-                    .ExecuteScalar(sql, parameters).ToString(), 
+                    .ExecuteScalar(query, new { tableName }).ToString(), 
                     out var num))
                 {
                     return num == 1;
