@@ -1,7 +1,7 @@
 ﻿using Dapper.Contrib.Extensions;
 using Overhaul.Core;
 
-var connectionString = @"Server=86.48.0.227;Database=testapp;User Id=sa;Password=Kwende1995!;";
+var connectionString = @"";
 
 var tracker = new ModelTracker(connectionString);
 
