@@ -6,9 +6,9 @@ namespace OverhaulTests
     {
         private readonly static Dictionary<string, string> _cache = new();
 
-        public static string? GetString(string section)
+        public static string GetString(string section)
         {
-            if(_cache.ContainsKey(section))
+            if (_cache.ContainsKey(section))
             {
                 return _cache[section];
             }
@@ -21,7 +21,7 @@ namespace OverhaulTests
             var configurationRoot = builder.Build();
 
             if (configurationRoot[section] != null)
-            { 
+            {
                 _cache[section] = configurationRoot[section];
 
                 return _cache[section];
