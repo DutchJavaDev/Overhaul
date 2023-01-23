@@ -10,7 +10,7 @@ namespace Overhaul.Core
 {
     public sealed class ModelTracker : IModelTracker
     {
-        internal static ModelTrackerOptions Options = new();
+        internal static ModelTrackerOptions Options;
         private readonly ISqlGenerator sqlGenerator;
         private readonly ISchemaManager schemaManager;
         private readonly IEnumerable<TableDefinition> databaseDefinitions;
@@ -24,14 +24,14 @@ namespace Overhaul.Core
             sqlGenerator = new SqlGenerator();
 
             schemaManager = new SchemaManager();
-            
+
             databaseDefinitions = LoadDatabaseDefinitons();
         }
 
         public void Track(IEnumerable<Type> types)
         {
             var definitions = CreateDefinitions(types);
-            
+
             if (definitions.Any() || databaseDefinitions.Any())
             {
                 CheckForAddedDefinitions(definitions);
@@ -41,12 +41,12 @@ namespace Overhaul.Core
         }
         private void CheckForDeletedDefinitions(IEnumerable<TableDefinition> definitions)
         {
-            var deletedDefinitions = databaseDefinitions.Where(i => 
+            var deletedDefinitions = databaseDefinitions.Where(i =>
             !definitions.Any(ii => ii.TableName == i.TableName));
 
             if (deletedDefinitions.Any())
             {
-                schemaManager.RunSchemaDelete(databaseDefinitions.Where(i => 
+                schemaManager.RunSchemaDelete(databaseDefinitions.Where(i =>
                 !definitions.Any(ii => i.Equals(ii))));
             }
         }
@@ -93,7 +93,7 @@ namespace Overhaul.Core
         }
 
         // Move to class
-        internal static IEnumerable<TableDefinition> 
+        internal static IEnumerable<TableDefinition>
             CreateDefinitions(IEnumerable<Type> types)
         {
             return types.Select(i => BuildDefinitions(i));
@@ -104,10 +104,10 @@ namespace Overhaul.Core
         {
             var tableName = GetTableName(type);
             var properties = Supported.GetTypeProperties(type);
-            var columnCollection = 
+            var columnCollection =
                 Supported.ConvertPropertiesToTypesString(properties, out var count);
 
-            return new() 
+            return new()
             {
                 TableName = tableName,
                 ColumnCollection = columnCollection,
@@ -120,7 +120,7 @@ namespace Overhaul.Core
         internal static string GetTableName(Type type)
         {
             if (Attribute.IsDefined(type, typeof(TableAttribute))
-                && type.GetCustomAttribute(typeof(TableAttribute)) 
+                && type.GetCustomAttribute(typeof(TableAttribute))
                 is TableAttribute table)
             {
                 return table.Name;
@@ -129,7 +129,7 @@ namespace Overhaul.Core
         }
 #if DEBUG 
         // Only needed when debugging, running test
-        public static void DeleteTestTables(Type[] tables, string conn = "", bool deleteDef = false)
+        public static void DeleteTestTables(IEnumerable<Type> tables, string conn = "", bool deleteDef = false)
         {
             if (!string.IsNullOrEmpty(conn))
             {
@@ -141,7 +141,7 @@ namespace Overhaul.Core
 
             if (deleteDef)
             {
-                // Auto delete this fucker
+                // Auto delete this fucker :)
                 del.Add(typeof(TableDefinition));
             }
 
