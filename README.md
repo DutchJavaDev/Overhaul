@@ -3,11 +3,10 @@
 Dapper is great but it missed something for me and that was creating,altering and deleting tables without me having to do it manually, so i came up with this.
 It uses Reflection to get type,properties etc.
 
-Takes care of the following
-- Creating, updating and deleting tables based types
-  - Checks for changes
-- Creating, updating columns based on types properties 
-  - Checks for changes
+Takes care of tracking the following changes.
+Property added to a type -> adds a new column to the existing table
+Property deleted from a type -> depending on the options it will either set the column to null if you want to keep the data or complete delete the column and all its data.
+Property precision change -> change the db column type, might fail!
  
 Project goals plans etc can be found here
 https://gelatinous-archer-556.notion.site/Overhaul-MT-Model-Tracker-74fb2ce6fe324a9f923e8be862a36698
