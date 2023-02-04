@@ -19,9 +19,9 @@ namespace Overhaul.Core
 
         public IEnumerable<TableDefinition> GetCollection()
         {
-            // Wont work until insert is done 
+            // Wont work until insert is done, its done?
             using (Connection = ConnectionManager.GetSqlConnection())
-            { 
+            {
                 return Connection.Query<TableDefinition>($"SELECT * FROM {ModelTracker.GetTableName(typeof(TableDefinition))}" +
                 $" WHERE {nameof(TableDefinition.Id)} > 1");
             }
@@ -31,7 +31,7 @@ namespace Overhaul.Core
         {
             using (Connection = ConnectionManager.GetSqlConnection())
             {
-                var query = DefaultQuery.CreateTable(tableDef.TableName,tableDef.ColumnCollection);
+                var query = DefaultQuery.CreateTable(tableDef.TableName, tableDef.ColumnCollection);
                 Connection.ExecuteScalar(query);
                 Connection.Insert(tableDef);
             }
@@ -42,7 +42,7 @@ namespace Overhaul.Core
         public bool DeleteTable(string tableName)
         {
             if (!TableExists(tableName))
-                    return true;
+                return true;
 
             using (Connection = ConnectionManager.GetSqlConnection())
             {
@@ -58,11 +58,11 @@ namespace Overhaul.Core
 
         public bool TableExists(string tableName)
         {
-            // Only checks for tables within this database [sandbox i guess]
+            // Only checks for tables within this database [sandbox i guess], im dumb
             using (Connection = ConnectionManager.GetSqlConnection())
             {
                 if (int.TryParse(Connection
-                    .ExecuteScalar(SchemaCheckQuery, new { tableName }).ToString(), 
+                    .ExecuteScalar(SchemaCheckQuery, new { tableName }).ToString(),
                     out var num))
                 {
                     return num == 1;
