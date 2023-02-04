@@ -1,4 +1,6 @@
-﻿namespace Overhaul.Interface
+﻿using System.Data.SqlClient;
+
+namespace Overhaul.Interface
 {
     public interface IModelTracker
     {
@@ -13,5 +15,7 @@
         /// </summary>
         /// <returns></returns>
         public ICrud GetCrudInstance();
+
+        public SqlConnection GetSqlConnection();
     }
 }

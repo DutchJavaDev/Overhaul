@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Data.SqlClient;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using Dapper.Contrib.Extensions;
 using Overhaul.Common;
@@ -75,6 +76,11 @@ namespace Overhaul.Core
         public ICrud GetCrudInstance()
         {
             return new Crud(databaseDefinitions);
+        }
+
+        public SqlConnection GetSqlConnection()
+        {
+            return ConnectionManager.GetSqlConnection();
         }
 
         private IEnumerable<TableDefinition> LoadDatabaseDefinitons()
