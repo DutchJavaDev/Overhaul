@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.3.32922.545
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Overhaul", "Overhaul\Overhaul.csproj", "{D7B2E339-8E49-4843-B084-76054FB26E0D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dbhaul", "Overhaul\Dbhaul.csproj", "{D7B2E339-8E49-4843-B084-76054FB26E0D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OverhaulTests", "OverhaulTests\OverhaulTests.csproj", "{7458AEF8-EFA3-46D5-B0F7-483861A551D9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DbhaulTests", "OverhaulTests\DbhaulTests.csproj", "{7458AEF8-EFA3-46D5-B0F7-483861A551D9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OverhaulTestApp", "OverhaulTestApp\OverhaulTestApp.csproj", "{D8EF3FCA-6AE2-40CE-BEEA-5E37467248C1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dbhaul.DataModels", "Dbhaul.DataModels\Dbhaul.DataModels.csproj", "{6930A34A-9EA0-408E-A60C-BE6E10172FF3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +23,10 @@ Global
 		{7458AEF8-EFA3-46D5-B0F7-483861A551D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7458AEF8-EFA3-46D5-B0F7-483861A551D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7458AEF8-EFA3-46D5-B0F7-483861A551D9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D8EF3FCA-6AE2-40CE-BEEA-5E37467248C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D8EF3FCA-6AE2-40CE-BEEA-5E37467248C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D8EF3FCA-6AE2-40CE-BEEA-5E37467248C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D8EF3FCA-6AE2-40CE-BEEA-5E37467248C1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6930A34A-9EA0-408E-A60C-BE6E10172FF3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6930A34A-9EA0-408E-A60C-BE6E10172FF3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6930A34A-9EA0-408E-A60C-BE6E10172FF3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6930A34A-9EA0-408E-A60C-BE6E10172FF3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

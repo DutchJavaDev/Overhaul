@@ -24,7 +24,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Overhaul\Overhaul.csproj" />
+    <ProjectReference Include="..\Dbhaul.DataModels\Dbhaul.DataModels.csproj" />
+    <ProjectReference Include="..\Overhaul\Dbhaul.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Common\" />
+    <Folder Include="Data\Attributes\" />
   </ItemGroup>
 
 </Project>
