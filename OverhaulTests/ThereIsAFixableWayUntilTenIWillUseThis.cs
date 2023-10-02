@@ -11,7 +11,7 @@ namespace OverhaulTests
             var connectionString = TestHelper.GetString("secrete");
 
             // Assert
-            Assert.AreEqual("found me!",connectionString);
+            Assert.AreEqual("found me!", connectionString);
         }
     }
 }

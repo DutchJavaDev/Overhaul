@@ -39,12 +39,22 @@ namespace Dbhaul.Common
 
             var builder = new StringBuilder();
 
-            foreach(var column in validColumns)
+            foreach (var column in validColumns)
             {
-                builder.Append($"{column}{(column == validColumns.Last() ? "" : ",")}");
+                var isLast = column == validColumns.Last();
+
+                if (isLast)
+                {
+                    builder.Append(column);
+                }
+                else
+                {
+                    builder.AppendLine(string.Concat(column, ','));
+                }
+
             }
 
-            return builder.ToString();
+            return builder.ToString().TrimEnd();
         }
         public static string[] ConvertTypesStringToArray(string types)
         {
@@ -53,7 +63,7 @@ namespace Dbhaul.Common
 
         public static (bool hasValue, TableNameAttribute table) HasTableAttribute(Type model)
         {
-            if(Attribute.IsDefined(model, typeof(TableNameAttribute))
+            if (Attribute.IsDefined(model, typeof(TableNameAttribute))
                 && model.GetCustomAttribute(typeof(TableNameAttribute))
                 is TableNameAttribute table)
             {
@@ -99,11 +109,11 @@ namespace Dbhaul.Common
 
             if (IsIdentityType(property))
             {
-                buffer.Append(" generated always as identity ");
+                buffer.Append("generated always as identity");
             }
             else if (IsIdentityTypeGUID(property))
             {
-                buffer.Append(" default gen_random_uuid() primary key ");
+                buffer.Append("default gen_random_uuid() primary key");
             }
             else if (IsDefined(property, typeof(PrecisionAttribute))
                 && property.GetCustomAttribute<PrecisionAttribute>() is

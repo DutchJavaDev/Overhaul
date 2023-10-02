@@ -2,13 +2,12 @@
 
 namespace Dbhaul.DataModels.Models
 {
-    [OneToMany(typeof(UserModel), nameof(UserId))]
-    public sealed class PostModel
+    [ManyToMany(typeof(TagModel))]
+    public sealed class ArticleModel
     {
         [Id]
         public Guid Id { get; set; }
 
-        public Guid UserId { get; set; }
-
+        public string? Title { get; set; }
     }
 }

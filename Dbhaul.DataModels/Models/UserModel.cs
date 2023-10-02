@@ -7,7 +7,7 @@ namespace Dbhaul.DataModels.Models
     {
         [Id]
         public Guid? Id { get; set; }
-        
+
         public string? SurName { get; set; }
 
         public string? LastName { get; set; }

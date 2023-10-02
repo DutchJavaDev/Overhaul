@@ -9,7 +9,11 @@ namespace Dbhaul.Core.Tests
         [TestMethod()]
         public void CreateBuildScriptTest()
         {
-            var builder = new PSQLScriptGenerator(new[] { typeof(UserModel), typeof(PostModel) });
+            var builder = new PSQLScriptGenerator(new[] 
+            { 
+                typeof(PostModel), typeof(UserModel),
+                typeof(ArticleModel), typeof(TagModel)
+            });
 
             var script = builder.CreateBuildScript();
 

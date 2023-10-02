@@ -1,10 +1,8 @@
-﻿using System.Reflection;
-
-namespace Dbhaul.Core
+﻿namespace Dbhaul.Core
 {
     public static class AttributeCache
     {
-        private static Dictionary<Guid, List<Attribute>> Cache = new();
+        private static readonly Dictionary<Guid, List<Attribute>> Cache = new();
 
         public static bool ContainsKey(Guid key)
         {

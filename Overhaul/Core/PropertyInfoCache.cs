@@ -4,7 +4,7 @@ namespace Dbhaul.Core
 {
     public static class PropertyInfoCache
     {
-        private static Dictionary<Guid, List<PropertyInfo>> Cache = new();
+        private static readonly Dictionary<Guid, List<PropertyInfo>> Cache = new();
 
         public static bool ContainsKey(Guid key)
         {

@@ -1,15 +1,12 @@
 ﻿namespace Dbhaul.Attributes
 {
     [AttributeUsage(AttributeTargets.Class)]
-    public sealed class OneToMany : Attribute
+    public sealed class ManyToMany : Attribute
     {
         public Type Type { get; init; }
-        public string KeyName { get; init; }
-
-        public OneToMany(Type type, string keyName)
+        public ManyToMany(Type type)
         {
             Type = type;
-            KeyName = keyName;
         }
     }
 }

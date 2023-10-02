@@ -10,5 +10,7 @@
 
         // Table constraints? dunno
         public string TableConstraints { get; set; }
+
+
     }
 }
